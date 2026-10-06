@@ -1,0 +1,25 @@
+{
+  "id": "02-hazardbot",
+  "title": "HazardBot: Hazardous Environment Exploration Rover",
+  "subtitle": "Dual-Controlled (WiFi + Bluetooth) Environmental Sensing Rover",
+  "status": "completed",
+  "category": "Robotics & Embedded Systems",
+  "team": "Team VERTEX (9 Members)",
+  "institution": "Minia University, Faculty of Education",
+  "date": "2026-05",
+  "featured": true,
+  "description": "A low-cost (~$24) dual-controlled (Bluetooth + WiFi) two-wheel rover designed to enter hazardous environments and stream real-time telemetry (MQ-2 gas, MQ-135 air quality, DHT11 temp/humidity) to a smartphone Progressive Web App and embedded web server running on an ESP32-WROOM-32.",
+  "techStack": [
+    "ESP32-WROOM-32 C++",
+    "WiFi & Bluetooth Dual-Stack",
+    "MQ-2 Flammable Gas Sensor",
+    "MQ-135 Hazardous Air Quality Sensor",
+    "DHT11 Climate Sensor",
+    "L298N Dual H-Bridge Motor Driver",
+    "Progressive Web App (PWA)",
+    "HTML5 / CSS3 / JavaScript"
+  ],
+  "links": {
+    "repository": "https://github.com/3B00D-0/capstone-projects/tree/main/projects/02-hazardbot"
+  }
+}

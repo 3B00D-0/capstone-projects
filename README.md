@@ -3,9 +3,9 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Author](https://img.shields.io/badge/Author-Abdelrahman%20Mohamed-orange.svg)](https://github.com/3B00D-0)
 [![Institution](https://img.shields.io/badge/Institution-Minia%20University-green.svg)](https://www.minia.edu.eg/)
-[![Field](https://img.shields.io/badge/Focus-STEM%20Education%20%7C%20Engineering-purple.svg)](#)
+[![Field](https://img.shields.io/badge/Focus-STEM%20Education%20%7C%20Robotics%20%7C%20IoT-purple.svg)](#)
 
-> A centralized, production-grade monorepo containing undergraduate and research capstone projects by **Abdelrahman Mohamed (Abdo)** at the intersection of **STEM Education, Robotics, Systems Engineering, and Applied Mathematics**.
+> A centralized, production-grade monorepo containing undergraduate and research capstone projects by **Abdelrahman Mohamed (Abdo)** at the intersection of **STEM Education, Robotics, IoT Systems, Applied Mathematics, and Machine Learning**.
 
 ---
 
@@ -13,8 +13,10 @@
 
 | # | Project | Category | Tech Stack | Status | Link |
 | :-: | :--- | :--- | :--- | :-: | :--- |
-| **01** | **[Smart Nursing Robot](./projects/01-smart-nursing-robot/)** | Robotics / Healthcare | Arduino C++, PID, QTR-8A, Touch Sensor | Completed | [Explore →](./projects/01-smart-nursing-robot/) |
-| **02** | *(Next Capstone Project)* | STEM Tech / Systems | *To be added* | Planned | `_template/` |
+| **01** | **[Smart Nursing Robot](./projects/01-smart-nursing-robot/)** | Healthcare Robotics | Arduino C++, PID, QTR-8A, Touch Sensor | Completed | [Explore →](./projects/01-smart-nursing-robot/) |
+| **02** | **[HazardBot Rover](./projects/02-hazardbot/)** | Hazardous Reconnaissance | ESP32-WROOM-32, WiFi/BLE, MQ-2, MQ-135, PWA | Completed | [Explore →](./projects/02-hazardbot/) |
+| **03** | **[Smart Greenhouse](./projects/03-smart-greenhouse-esp8266/)** | IoT & Climate Control | ESP8266 NodeMCU, Soil Moisture, DHT22, Relays, LCD | Completed | [Explore →](./projects/03-smart-greenhouse-esp8266/) |
+| **04** | **[Smart Sign Language Glove](./projects/04-smart-sign-language-glove/)** | Assistive Tech & ML | ESP32, Flex Sensors, MPU6050, Random Forest, React | Active | [Explore →](./projects/04-smart-sign-language-glove/) |
 
 ---
 
@@ -24,15 +26,30 @@ Every capstone inside this monorepo is completely self-contained while conformin
 
 ```text
 capstone-projects/
-├── README.md                          # Master Capstone Portfolio Dashboard
-├── .gitignore                         # Universal multi-language clean ignore
-├── shared/                            # Reusable utilities, templates, styles
+├── README.md                              # Master Capstone Portfolio Dashboard
+├── .gitignore                             # Universal multi-language clean ignore
+├── shared/                                # Reusable utilities, templates, styles
 └── projects/
-    ├── 01-smart-nursing-robot/        # Autonomous Healthcare Delivery Vehicle
-    │   ├── README.md                  # Project whitepaper & engineering docs
-    │   ├── project.json               # Structured metadata (API feed for Mega Portfolio)
-    │   └── src/                       # Source code, firmware, or software
-    └── _template/                     # Starter template for new capstones
+    ├── 01-smart-nursing-robot/            # Autonomous Hospital Delivery Vehicle
+    │   ├── README.md                      # Engineering documentation & schematics
+    │   ├── project.json                   # Structured metadata for Mega Portfolio API
+    │   └── src/                           # Arduino C++ firmware
+    ├── 02-hazardbot/                      # Hazardous Exploration Rover + PWA
+    │   ├── README.md                      # Full EDP documentation & specs
+    │   ├── project.json                   # Structured metadata
+    │   ├── firmware/                      # Flight code & calibration sketches
+    │   └── app/                           # Progressive Web App (PWA) interface
+    ├── 03-smart-greenhouse-esp8266/       # Automated IoT Microclimate Care System
+    │   ├── README.md                      # Hardware architecture & wiring specs
+    │   ├── project.json                   # Structured metadata
+    │   └── src/                           # ESP8266 firmware
+    ├── 04-smart-sign-language-glove/      # Real-Time Sign Translation Wearable
+    │   ├── README.md                      # ML pipeline & sensor layout
+    │   ├── project.json                   # Structured metadata
+    │   ├── firmware/                      # ESP32 sensor capture
+    │   ├── backend/                       # Python AI & WebSocket bridge
+    │   └── frontend/                      # React visualization web app
+    └── _template/                         # Starter template for new capstones
         ├── README.md
         ├── project.json
         └── src/
@@ -48,8 +65,8 @@ Each project directory carries a standardized **`project.json`** manifest. This 
 To initialize a new project in this monorepo:
 1. Duplicate `projects/_template` into `projects/<new-project-slug>`.
 2. Update `project.json` with your title, category, and tech stack tags.
-3. Write your implementation inside `src/`.
-4. Add an entry to the table in this `README.md`.
+3. Write your implementation inside `src/` (or `firmware/` / `software/`).
+4. Add an entry to the index table in this `README.md`.
 
 ---
 

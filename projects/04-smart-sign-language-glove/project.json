@@ -1,0 +1,25 @@
+{
+  "id": "04-smart-sign-language-glove",
+  "title": "Smart Sign Language Glove",
+  "subtitle": "Real-Time Sign Translation with Flex Sensors, Random Forest ML & React",
+  "status": "in-progress",
+  "category": "Assistive Tech & Machine Learning",
+  "team": "Solo / Team",
+  "institution": "Minia University, Faculty of Education",
+  "date": "2025-12",
+  "featured": true,
+  "description": "An assistive communication wearable translating sign language gestures into text in real time. An ESP32 measures finger articulation via 5 flex sensors and wrist posture via an MPU6050 IMU, streaming telemetry to a Python Random Forest classifier and a real-time React web interface via WebSockets.",
+  "techStack": [
+    "ESP32 C++",
+    "Flex Sensors (Voltage Dividers)",
+    "MPU6050 6-DOF IMU",
+    "Python Scikit-Learn",
+    "Random Forest Classification",
+    "WebSockets",
+    "React.js"
+  ],
+  "links": {
+    "repository": "https://github.com/3B00D-0/capstone-projects/tree/main/projects/04-smart-sign-language-glove",
+    "originalRepo": "https://github.com/3B00D-0/Gloves-Project"
+  }
+}

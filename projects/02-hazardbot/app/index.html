@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>HazardBot Mobile</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#00d2ff">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+
+:root{
+    --bg:#070b11;
+    --panel:#0d141d;
+    --border:#1f3447;
+
+    --cyan:#00d2ff;
+    --green:#00ff9d;
+    --yellow:#ffcc00;
+    --red:#ff3b3b;
+
+    --text:#ffffff;
+    --muted:#6f8ca3;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:Arial, Helvetica, sans-serif;
+    height:100vh;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+}
+
+body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+
+    background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+
+    background-size:30px 30px;
+
+    pointer-events:none;
+}
+
+/* HEADER */
+
+header{
+    height:70px;
+    min-height:70px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 18px;
+
+    border-bottom:1px solid var(--border);
+
+    background:rgba(10,16,24,0.95);
+
+    backdrop-filter:blur(8px);
+
+    z-index:10;
+}
+
+.logo-wrap{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo{
+    width:42px;
+    height:42px;
+
+    border:2px solid var(--cyan);
+    border-radius:10px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:var(--cyan);
+
+    font-weight:bold;
+    font-size:20px;
+
+    box-shadow:0 0 14px rgba(0,210,255,0.45);
+}
+
+.title h1{
+    font-size:1rem;
+    letter-spacing:2px;
+    color:var(--cyan);
+}
+
+.title span{
+    font-size:0.65rem;
+    color:var(--muted);
+}
+
+#connectBtn{
+    border:none;
+
+    background:transparent;
+
+    border:1px solid var(--cyan);
+
+    color:var(--cyan);
+
+    padding:10px 14px;
+
+    border-radius:10px;
+
+    font-size:0.72rem;
+    font-weight:bold;
+
+    cursor:pointer;
+
+    box-shadow:0 0 14px rgba(0,210,255,0.25);
+}
+
+#connectBtn.connected{
+    border-color:var(--green);
+    color:var(--green);
+
+    box-shadow:0 0 14px rgba(0,255,157,0.35);
+}
+
+/* MAIN */
+
+main{
+    flex:1;
+
+    overflow:auto;
+
+    padding:16px;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:16px;
+}
+
+/* PANELS */
+
+.robot-panel,
+.controls-panel{
+    background:var(--panel);
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    padding:18px;
+}
+
+/* ROBOT */
+
+.robot-status{
+    display:flex;
+    justify-content:space-between;
+
+    margin-bottom:10px;
+
+    font-size:0.72rem;
+
+    color:var(--muted);
+}
+
+#robot-state{
+    color:var(--cyan);
+}
+
+.robot-visual{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    height:120px;
+}
+
+#robot-svg{
+    width:90px;
+    height:110px;
+
+    transition:transform 0.12s ease;
+
+    filter:drop-shadow(0 0 10px rgba(0,210,255,0.4));
+}
+
+.robot-forward{
+    transform:translateY(-10px);
+}
+
+.robot-backward{
+    transform:translateY(10px);
+}
+
+.robot-left{
+    transform:rotate(-18deg);
+}
+
+.robot-right{
+    transform:rotate(18deg);
+}
+
+/* SENSOR GRID */
+
+.sensor-grid{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:10px;
+}
+
+.sensor-card{
+    background:var(--panel);
+
+    border:1px solid var(--border);
+
+    border-radius:16px;
+
+    padding:10px;
+
+    min-height:85px;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+
+    transition:0.25s;
+}
+
+.sensor-card.warning{
+    border-color:var(--yellow);
+
+    box-shadow:0 0 15px rgba(255,204,0,0.18);
+}
+
+.sensor-card.danger{
+    border-color:var(--red);
+
+    box-shadow:0 0 18px rgba(255,59,59,0.22);
+
+    background:rgba(255,59,59,0.08);
+}
+
+.sensor-label{
+    color:var(--muted);
+
+    font-size:0.68rem;
+
+    margin-bottom:7px;
+}
+
+.sensor-value{
+    font-size:1.1rem;
+    font-weight:bold;
+}
+
+/* CONTROLS */
+
+.controls-header{
+    text-align:center;
+
+    color:var(--muted);
+
+    font-size:0.7rem;
+
+    margin-bottom:18px;
+}
+
+.controls{
+    display:grid;
+
+    grid-template-columns:repeat(3,70px);
+    grid-template-rows:repeat(2,70px);
+
+    justify-content:center;
+
+    gap:10px;
+}
+
+.d-pad-btn{
+    background:#101b26;
+
+    border:1px solid var(--border);
+
+    border-radius:16px;
+
+    color:var(--cyan);
+
+    font-size:1.5rem;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    user-select:none;
+
+    box-shadow:0 5px 0 #05080d;
+
+    transition:0.08s;
+
+    cursor:pointer;
+}
+
+.d-pad-btn.active,
+.d-pad-btn:active{
+    transform:translateY(4px);
+
+    box-shadow:none;
+
+    border-color:var(--cyan);
+
+    background:rgba(0,210,255,0.12);
+}
+
+.btn-up{
+    grid-column:2;
+    grid-row:1;
+}
+
+.btn-left{
+    grid-column:1;
+    grid-row:2;
+}
+
+.btn-down{
+    grid-column:2;
+    grid-row:2;
+}
+
+.btn-right{
+    grid-column:3;
+    grid-row:2;
+}
+
+/* DANGER */
+
+#danger-overlay{
+    position:fixed;
+    inset:0;
+
+    background:rgba(255,0,0,0.18);
+
+    display:none;
+
+    pointer-events:none;
+
+    animation:dangerFlash 1s infinite;
+}
+
+@keyframes dangerFlash{
+    0%,100%{opacity:0.25}
+    50%{opacity:1}
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="danger-overlay"></div>
+
+<header>
+
+<div class="logo-wrap">
+
+<div class="logo">V</div>
+
+<div class="title">
+<h1>HAZARDBOT</h1>
+<span>VERTEX OPS MOBILE</span>
+</div>
+
+</div>
+
+<button id="connectBtn">
+CONNECT
+</button>
+
+</header>
+
+<main>
+
+<!-- ROBOT -->
+
+<div class="robot-panel">
+
+<div class="robot-status">
+
+<span>ROBOT STATUS</span>
+
+<span id="robot-state">
+IDLE
+</span>
+
+</div>
+
+<div class="robot-visual">
+
+<svg id="robot-svg" viewBox="0 0 200 240">
+
+<rect
+x="30"
+y="20"
+width="140"
+height="200"
+rx="18"
+fill="none"
+stroke="#00d2ff"
+stroke-width="3"/>
+
+<rect
+x="10"
+y="65"
+width="22"
+height="80"
+rx="5"
+fill="#111"
+stroke="#ffcc00"
+stroke-width="2"/>
+
+<rect
+x="168"
+y="65"
+width="22"
+height="80"
+rx="5"
+fill="#111"
+stroke="#ffcc00"
+stroke-width="2"/>
+
+<circle
+cx="100"
+cy="55"
+r="16"
+fill="rgba(0,210,255,0.15)"
+stroke="#00d2ff"
+stroke-width="2"/>
+
+<polygon
+points="100,4 112,22 88,22"
+fill="#00d2ff"/>
+
+</svg>
+
+</div>
+</div>
+
+<!-- SENSORS -->
+
+<div class="sensor-grid">
+
+<div class="sensor-card" id="card-temp">
+<div class="sensor-label">TEMPERATURE</div>
+<div class="sensor-value" id="val-temp">
+--.-°C
+</div>
+</div>
+
+<div class="sensor-card" id="card-hum">
+<div class="sensor-label">HUMIDITY</div>
+<div class="sensor-value" id="val-hum">
+--.-%
+</div>
+</div>
+
+<div class="sensor-card" id="card-gas">
+<div class="sensor-label">MQ-2 GAS</div>
+<div class="sensor-value" id="val-gas">
+----
+</div>
+</div>
+
+<div class="sensor-card" id="card-air">
+<div class="sensor-label">MQ-135 AIR</div>
+<div class="sensor-value" id="val-air">
+----
+</div>
+</div>
+
+</div>
+
+<!-- CONTROLS -->
+
+<div class="controls-panel">
+
+<div class="controls-header">
+HOLD TO MOVE · RELEASE TO STOP
+</div>
+
+<div class="controls">
+
+<div class="d-pad-btn btn-up" data-cmd="F">
+▲
+</div>
+
+<div class="d-pad-btn btn-left" data-cmd="L">
+◀
+</div>
+
+<div class="d-pad-btn btn-down" data-cmd="B">
+▼
+</div>
+
+<div class="d-pad-btn btn-right" data-cmd="R">
+▶
+</div>
+
+</div>
+
+</div>
+
+</main>
+
+<script>
+
+const SERVICE_UUID =
+"4fafc201-1fb5-459e-8fcc-c5c9c331914b";
+
+const RX_CHARACTERISTIC_UUID =
+"beb5483e-36e1-4688-b7f5-ea07361b26a8";
+
+const TX_CHARACTERISTIC_UUID =
+"8a6e9a08-3cf1-45a8-9d51-4e4f7a6f8b9e";
+
+let bleDevice = null;
+
+let rxCharacteristic = null;
+let txCharacteristic = null;
+
+let currentCommand = 'S';
+
+const connectBtn =
+document.getElementById('connectBtn');
+
+const robotSVG =
+document.getElementById('robot-svg');
+
+const robotState =
+document.getElementById('robot-state');
+
+const overlay =
+document.getElementById('danger-overlay');
+
+const cards =
+document.querySelectorAll('.sensor-card');
+
+const valTemp =
+document.getElementById('val-temp');
+
+const valHum =
+document.getElementById('val-hum');
+
+const valGas =
+document.getElementById('val-gas');
+
+const valAir =
+document.getElementById('val-air');
+
+/* CONNECT */
+
+connectBtn.addEventListener(
+'click',
+async ()=>{
+
+if(bleDevice && bleDevice.gatt.connected){
+bleDevice.gatt.disconnect();
+return;
+}
+
+try{
+
+connectBtn.innerText = 'SCANNING...';
+
+bleDevice =
+await navigator.bluetooth.requestDevice({
+
+filters:[
+{name:'HazardBot_BLE'}
+],
+
+optionalServices:[
+SERVICE_UUID
+]
+
+});
+
+bleDevice.addEventListener(
+'gattserverdisconnected',
+onDisconnected
+);
+
+connectBtn.innerText =
+'CONNECTING...';
+
+const server =
+await bleDevice.gatt.connect();
+
+const service =
+await server.getPrimaryService(
+SERVICE_UUID
+);
+
+rxCharacteristic =
+await service.getCharacteristic(
+RX_CHARACTERISTIC_UUID
+);
+
+txCharacteristic =
+await service.getCharacteristic(
+TX_CHARACTERISTIC_UUID
+);
+
+await rxCharacteristic.startNotifications();
+
+rxCharacteristic.addEventListener(
+'characteristicvaluechanged',
+handleSensorData
+);
+
+connectBtn.innerText = 'CONNECTED';
+
+connectBtn.classList.add('connected');
+
+}
+catch(err){
+
+console.error(err);
+
+connectBtn.innerText = 'CONNECT';
+
+alert('Bluetooth connection failed');
+
+}
+
+});
+
+/* DISCONNECT */
+
+function onDisconnected(){
+
+connectBtn.innerText = 'CONNECT';
+
+connectBtn.classList.remove('connected');
+
+rxCharacteristic = null;
+txCharacteristic = null;
+
+}
+
+/* SENSOR DATA */
+
+function handleSensorData(event){
+
+const decoder =
+new TextDecoder('utf-8');
+
+const dataString =
+decoder.decode(event.target.value).trim();
+
+const parts =
+dataString.split('|');
+
+let alertStatus = 0;
+
+parts.forEach(part=>{
+
+const [key,value] =
+part.split(':');
+
+if(!value) return;
+
+switch(key){
+
+case 'T':
+valTemp.innerText =
+value + '°C';
+break;
+
+case 'H':
+valHum.innerText =
+value + '%';
+break;
+
+case 'Gas':
+valGas.innerText =
+value;
+break;
+
+case 'Air':
+valAir.innerText =
+value;
+break;
+
+case 'A':
+alertStatus =
+parseInt(value);
+break;
+
+}
+
+});
+
+updateAlertUI(alertStatus);
+
+}
+
+/* ALERT UI */
+
+function updateAlertUI(status){
+
+overlay.style.display = 'none';
+
+cards.forEach(card=>{
+
+card.classList.remove('warning');
+card.classList.remove('danger');
+
+});
+
+if(status === 2){
+
+overlay.style.display = 'block';
+
+cards.forEach(card=>{
+
+card.classList.add('danger');
+
+});
+
+}
+else if(status === 1){
+
+cards.forEach(card=>{
+
+card.classList.add('warning');
+
+});
+
+}
+
+}
+
+/* ROBOT MOTION */
+
+function updateRobotMotion(cmd){
+
+robotSVG.className.baseVal = '';
+
+robotSVG.setAttribute('class', '');
+
+if(cmd === 'F'){
+
+robotSVG.classList.add(
+'robot-forward'
+);
+
+robotState.innerText =
+'FORWARD';
+
+}
+
+else if(cmd === 'B'){
+
+robotSVG.classList.add(
+'robot-backward'
+);
+
+robotState.innerText =
+'BACKWARD';
+
+}
+
+else if(cmd === 'L'){
+
+robotSVG.classList.add(
+'robot-left'
+);
+
+robotState.innerText =
+'LEFT';
+
+}
+
+else if(cmd === 'R'){
+
+robotSVG.classList.add(
+'robot-right'
+);
+
+robotState.innerText =
+'RIGHT';
+
+}
+
+else{
+
+robotState.innerText =
+'IDLE';
+
+}
+
+}
+
+/* SEND COMMAND */
+
+async function sendCommand(cmd){
+
+if(!txCharacteristic) return;
+
+if(currentCommand === cmd) return;
+
+currentCommand = cmd;
+
+updateRobotMotion(cmd);
+
+try{
+
+const encoder =
+new TextEncoder();
+
+await txCharacteristic.writeValue(
+encoder.encode(cmd)
+);
+
+}
+catch(err){
+
+console.error(err);
+
+}
+
+}
+
+/* CONTROLS */
+
+const buttons =
+document.querySelectorAll('.d-pad-btn');
+
+buttons.forEach(btn=>{
+
+const cmd =
+btn.dataset.cmd;
+
+const press = (e)=>{
+
+e.preventDefault();
+
+document
+.querySelectorAll('.d-pad-btn')
+.forEach(b=>b.classList.remove('active'));
+
+btn.classList.add('active');
+
+sendCommand(cmd);
+
+};
+
+const release = (e)=>{
+
+e.preventDefault();
+
+document
+.querySelectorAll('.d-pad-btn')
+.forEach(b=>b.classList.remove('active'));
+
+sendCommand('S');
+
+};
+
+btn.addEventListener(
+'touchstart',
+press,
+{passive:false}
+);
+
+btn.addEventListener(
+'touchend',
+release,
+{passive:false}
+);
+
+btn.addEventListener(
+'touchcancel',
+release,
+{passive:false}
+);
+
+btn.addEventListener(
+'mousedown',
+press
+);
+
+btn.addEventListener(
+'mouseup',
+release
+);
+
+btn.addEventListener(
+'mouseleave',
+e=>{
+
+if(e.buttons > 0){
+
+release(e);
+
+}
+
+});
+
+});
+
+/* EMERGENCY RESET */
+
+window.addEventListener(
+'blur',
+()=>{
+
+document
+.querySelectorAll('.d-pad-btn')
+.forEach(b=>b.classList.remove('active'));
+
+sendCommand('S');
+
+}
+);
+
+window.addEventListener(
+'touchend',
+()=>{
+
+document
+.querySelectorAll('.d-pad-btn')
+.forEach(b=>b.classList.remove('active'));
+
+}
+);
+
+</script>
+</body>
+</html>
