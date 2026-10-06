@@ -24,49 +24,47 @@ It tracks hand gestures in real time using 5 finger flex sensors and a 6-axis in
 
 ---
 
-## 🔌 Visual Hardware Wiring & Signal Diagram
+## 🔌 System Hardware Architecture (2-Tier Specification)
+
+### Tier 1: The Big Picture (System Block Architecture)
+*High-level interconnection of primary functional subsystems:*
 
 ```mermaid
-graph TD
-    subgraph Wearable ["🧤 Hand & Wrist Wearable"]
-        FLEX1["Thumb Flex Sensor"] -->|"Voltage Divider (10kΩ)"| ADC1["GPIO 32 (ADC1_CH4)"]
-        FLEX2["Index Flex Sensor"] -->|"Voltage Divider (10kΩ)"| ADC2["GPIO 35 (ADC1_CH7)"]
-        FLEX3["Middle Flex Sensor"] -->|"Voltage Divider (10kΩ)"| ADC3["GPIO 34 (ADC1_CH6)"]
-        FLEX4["Ring Flex Sensor"] -->|"Voltage Divider (10kΩ)"| ADC4["GPIO 39 (ADC1_CH3)"]
-        FLEX5["Pinky Flex Sensor"] -->|"Voltage Divider (10kΩ)"| ADC5["GPIO 36 (ADC1_CH0)"]
-        
-        IMU["MPU6050 6-DOF IMU"] -->|"I2C SDA (GPIO 21)"| ESP["ESP32 Microcontroller"]
-        IMU -->|"I2C SCL (GPIO 22)"| ESP
-        
-        ADC1 --> ESP
-        ADC2 --> ESP
-        ADC3 --> ESP
-        ADC4 --> ESP
-        ADC5 --> ESP
-    end
+graph LR
+    PWR["🔋 3.7V LiPo Battery<br>(Rechargeable Pack)"] -->|"Regulated 3.3V"| ESP["🧠 ESP32-WROOM-32<br>(Wearable Microcontroller)"]
+    
+    FLEX["🧤 5× Flex Sensor Array<br>(Finger Curvature Dividers)"] -->|"Analog Postures"| ESP
+    IMU["🧭 MPU6050 6-DOF IMU<br>(Wrist Pitch / Roll / Yaw)"] -->|"I2C Fast Bus"| ESP
+    
+    ESP <===>|"BLE / USB Serial"| PY["🐍 Python AI Engine<br>(Random Forest Classifier)"]
+    PY <===>|"Local WebSockets"| UI["💻 React Web Dashboard<br>(Live Word & Letter Display)"]
 
-    subgraph Pipeline ["⚡ Real-Time Pipeline"]
-        ESP -->|"Serial / BLE JSON"| PY["Python Random Forest Classifier"]
-        PY -->|"WebSocket Stream"| REACT["React Live Sign Translator UI"]
-    end
+    style PWR fill:#2e1f0c,stroke:#f59e0b,stroke-width:2px
+    style ESP fill:#0a2540,stroke:#38bdf8,stroke-width:2px
+    style FLEX fill:#062e20,stroke:#34d399,stroke-width:2px
+    style IMU fill:#134e4a,stroke:#2dd4bf,stroke-width:2px
+    style PY fill:#2d1233,stroke:#c084fc,stroke-width:2px
+    style UI fill:#1e1b4b,stroke:#818cf8,stroke-width:2px
 ```
 
 ---
 
-## 📋 Master Hardware Pinout Specification
+### Tier 2: Pin-by-Pin Assembly Specification
+*Bench wiring matrix with jumper color conventions:*
 
-| Joint / Component | Sensor Hardware | ESP32 GPIO | Channel | Circuit Topology | Measurement Target |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Thumb** | 2.2" Flex Sensor | **GPIO 32** | ADC1_CH4 | 10kΩ Voltage Divider | Metacarpophalangeal flexion |
-| **Index Finger** | 2.2" Flex Sensor | **GPIO 35** | ADC1_CH7 | 10kΩ Voltage Divider | Proximal interphalangeal flexion |
-| **Middle Finger** | 2.2" Flex Sensor | **GPIO 34** | ADC1_CH6 | 10kΩ Voltage Divider | Proximal interphalangeal flexion |
-| **Ring Finger** | 2.2" Flex Sensor | **GPIO 39** (VN) | ADC1_CH3 | 10kΩ Voltage Divider | Proximal interphalangeal flexion |
-| **Pinky Finger** | 2.2" Flex Sensor | **GPIO 36** (VP) | ADC1_CH0 | 10kΩ Voltage Divider | Proximal interphalangeal flexion |
-| **Wrist Gyroscope** | MPU6050 6-DOF | **GPIO 21** | I2C SDA | 4.7kΩ Pull-Up | Roll, pitch & yaw orientation |
-| **Wrist Accelerometer** | MPU6050 6-DOF | **GPIO 22** | I2C SCL | 4.7kΩ Pull-Up | Dynamic gesture acceleration |
+| Joint / Digit | Sensor Hardware | Wire Color | ESP32 GPIO | Channel | Circuit Topology | Biomechanical Measurement |
+| :--- | :--- | :---: | :--- | :--- | :--- | :--- |
+| **Thumb** | 2.2" Flex Sensor | 🟣 Purple | **GPIO 32** | ADC1_CH4 | 10kΩ Voltage Divider | Thumb opposition & bend angle |
+| **Index Finger** | 2.2" Flex Sensor | 🔵 Blue | **GPIO 35** | ADC1_CH7 | 10kΩ Voltage Divider | Index finger pointing & hook flexion |
+| **Middle Finger**| 2.2" Flex Sensor | 🟢 Green | **GPIO 34** | ADC1_CH6 | 10kΩ Voltage Divider | Middle finger joint curvature |
+| **Ring Finger** | 2.2" Flex Sensor | 🟡 Yellow | **GPIO 39** (VN)| ADC1_CH3 | 10kΩ Voltage Divider | Ring finger contracture tracking |
+| **Pinky Finger** | 2.2" Flex Sensor | ⚪ White | **GPIO 36** (VP)| ADC1_CH0 | 10kΩ Voltage Divider | Pinky extension for alphabet signs |
+| **IMU Clock** | MPU6050 6-DOF | 🟠 Orange | **GPIO 22** | I2C SCL | 4.7kΩ Pull-Up | Angular velocity & orientation clock |
+| **IMU Data** | MPU6050 6-DOF | 🟤 Brown | **GPIO 21** | I2C SDA | 4.7kΩ Pull-Up | 6-Axis motion telemetry |
+| **Power Rails** | Common Bus | 🔴 / ⚫ | **3V3 / GND**| Power | Regulated 3.3V | Supplies clean reference to flex dividers |
 
-> [!NOTE] ADC1 Exclusivity
-> - All 5 flex sensors are wired strictly to **ADC1 pins (GPIO 32, 34, 35, 36, 39)**. This allows uninterrupted BLE/WiFi wireless streaming from the ESP32 without ADC conflicts.
+> [!NOTE] ADC1 Hardware Isolation
+> - All 5 flex sensor voltage dividers are wired strictly to **ADC1 channels (GPIO 32, 34, 35, 36, 39)**. This guarantees that wireless BLE telemetry transmissions will never cause ADC timeouts or corrupt analog reads.
 
 ---
 

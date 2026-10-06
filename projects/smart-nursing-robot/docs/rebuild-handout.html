@@ -1,0 +1,863 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Nursing Robot — Rebuild Handout</title>
+<meta name="description" content="Cost-effective ESP32-S3 line-following nursing robot rebuild: BOM, wiring, power, pin map, calibration, PID, chassis and UAE purchase links.">
+<style>
+:root{
+  --bg:#f4f7fb;
+  --paper:#ffffff;
+  --ink:#162032;
+  --muted:#61708a;
+  --line:#dce4ef;
+  --accent:#2457d6;
+  --accent2:#0f8b8d;
+  --good:#18794e;
+  --warn:#a76400;
+  --danger:#b42318;
+  --shadow:0 10px 30px rgba(25,45,80,.07);
+  --radius:18px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font:15px/1.58 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+.hero{
+  background:linear-gradient(135deg,#0c1730 0%,#1d3e87 52%,#0f8b8d 100%);
+  color:#fff;
+  padding:54px 0 42px;
+}
+.hero-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:28px;align-items:center}
+.eyebrow{letter-spacing:.14em;text-transform:uppercase;font-size:12px;font-weight:800;opacity:.78}
+h1{font-size:clamp(34px,5vw,58px);line-height:1.05;margin:10px 0 16px}
+.hero p{max-width:760px;color:#d9e3fa;margin:0 0 22px;font-size:17px}
+.badges{display:flex;flex-wrap:wrap;gap:8px}
+.badge{border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.09);padding:7px 10px;border-radius:999px;font-size:12px;font-weight:700}
+.hero-card{
+  background:rgba(255,255,255,.10);
+  border:1px solid rgba(255,255,255,.18);
+  padding:18px;
+  border-radius:20px;
+  backdrop-filter:blur(6px);
+}
+.hero-card strong{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.1em;opacity:.78}
+.hero-card .big{font-size:30px;font-weight:900;margin:5px 0}
+.hero-card .small{color:#d9e3fa;font-size:13px}
+nav{
+  position:sticky;top:0;z-index:20;
+  background:rgba(255,255,255,.93);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.nav-inner{display:flex;gap:12px;overflow:auto;padding:9px 0}
+.nav-inner a{white-space:nowrap;padding:8px 10px;border-radius:10px;color:#42516a;font-weight:700;font-size:13px}
+.nav-inner a:hover{background:#edf2fb;text-decoration:none}
+main{padding:28px 0 60px}
+section{margin:0 0 24px}
+.card{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:24px;
+}
+h2{font-size:25px;line-height:1.2;margin:0 0 10px}
+h3{font-size:18px;margin:18px 0 8px}
+.lead{color:var(--muted);max-width:900px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.kpi{padding:17px;border:1px solid var(--line);border-radius:14px;background:#fbfcfe}
+.kpi .v{font-size:25px;font-weight:900}
+.kpi .l{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.tag{display:inline-block;padding:4px 8px;border-radius:999px;font-size:11px;font-weight:800;margin-right:5px}
+.tag.good{background:#e8f7ef;color:var(--good)}
+.tag.warn{background:#fff3df;color:var(--warn)}
+.tag.blue{background:#eaf0ff;color:#1e4eb9}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:11px 10px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:#50607a;background:#fafbfe}
+.price{font-weight:900;white-space:nowrap}
+.muted{color:var(--muted)}
+.note{font-size:13px;color:var(--muted);background:#f7f9fc;border-left:4px solid var(--accent);padding:11px 13px;border-radius:8px}
+.warnbox{font-size:13px;background:#fff8eb;border-left:4px solid #d98c16;padding:12px 13px;border-radius:8px}
+.goodbox{font-size:13px;background:#edf9f3;border-left:4px solid #2b9a68;padding:12px 13px;border-radius:8px}
+.linkbtn{
+  display:inline-block;
+  padding:7px 10px;border:1px solid #cfd9e8;border-radius:9px;
+  font-weight:800;font-size:12px;margin:2px 4px 2px 0;background:white
+}
+.linkbtn:hover{background:#f1f5fb;text-decoration:none}
+svg{width:100%;height:auto;display:block}
+.diagram{background:#fbfcfe;border:1px solid var(--line);border-radius:14px;padding:10px;overflow:auto}
+.diagram-title{font-weight:800;margin:0 0 8px}
+.pinmap{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px
+}
+.pin{border:1px solid var(--line);border-radius:10px;padding:9px;background:#fff}
+.pin code{font-weight:900;color:#153e9e}
+.pin small{display:block;color:var(--muted);margin-top:3px}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.step{
+  display:grid;grid-template-columns:42px 1fr;gap:13px;align-items:start;
+  padding:13px 0;border-bottom:1px solid var(--line)
+}
+.step:last-child{border-bottom:0}
+.num{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:#eaf0ff;color:#1e4eb9;font-weight:900
+}
+.smalllist{margin:8px 0 0 18px;padding:0}
+.smalllist li{margin:5px 0}
+.code{
+  background:#101827;color:#dbe8ff;border-radius:13px;padding:15px 17px;
+  overflow:auto;font:12.5px/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace
+}
+footer{color:#6c7890;font-size:12px;padding:0 0 48px}
+@media(max-width:900px){
+  .hero-grid,.grid2{grid-template-columns:1fr}
+  .grid3{grid-template-columns:1fr 1fr}
+  .pinmap{grid-template-columns:1fr 1fr}
+}
+@media(max-width:560px){
+  .wrap{padding:0 14px}
+  .card{padding:17px}
+  .grid3{grid-template-columns:1fr}
+  .pinmap{grid-template-columns:1fr}
+  table{font-size:13px}
+  th,td{padding:9px 7px}
+}
+@media print{
+  nav,.nav-inner,.screen-only{display:none!important}
+  body{background:#fff}
+  .hero{background:#fff;color:#000;padding:20px 0;border-bottom:2px solid #111}
+  .hero p,.hero-card .small{color:#444}
+  .badge{border:1px solid #aaa;background:#fff;color:#000}
+  .card{box-shadow:none;break-inside:avoid}
+  a{color:#000;text-decoration:underline}
+  main{padding-top:10px}
+}
+</style>
+</head>
+
+<body>
+<header class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Smart Nursing Robot · UAE School Project · Rebuild Specification</div>
+      <h1>One ESP32.<br>Clean power. Reliable line following.</h1>
+      <p>
+        A simplified rebuild of the original Arduino nursing robot, redesigned around an
+        ESP32-S3, an 8-channel analog QTR array, TB6612FNG motor control, separated power rails,
+        automatic sensor calibration, PID tuning from a phone, and a physical medicine box.
+      </p>
+      <div class="badges">
+        <span class="badge">1 MCU only</span>
+        <span class="badge">Wi-Fi control</span>
+        <span class="badge">8 analog sensors</span>
+        <span class="badge">No boot-strapping GPIOs used</span>
+        <span class="badge">Printable handout</span>
+      </div>
+    </div>
+    <div class="hero-card">
+      <strong>Recommended controller</strong>
+      <div class="big">ESP32-S3-DevKitC-1</div>
+      <div class="small">N8R8 variant • ESP32-S3-WROOM-1 • Wi-Fi + BLE • 45 physical GPIOs on the S3 family.</div>
+      <hr style="border:0;border-top:1px solid rgba(255,255,255,.18);margin:15px 0">
+      <strong>Base robot</strong>
+      <div class="big">2WD + 8-channel line sensor</div>
+      <div class="small">Acrylic chassis • 2 geared motors • caster • servo medicine hatch.</div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="wrap nav-inner">
+    <a href="#decision">Design decision</a>
+    <a href="#bom">Buy list</a>
+    <a href="#wiring">Wiring</a>
+    <a href="#power">Power</a>
+    <a href="#pid">PID</a>
+    <a href="#assembly">Assembly</a>
+    <a href="#testing">Testing</a>
+    <a href="#sources">Sources</a>
+  </div>
+</nav>
+
+<main>
+  <section id="decision">
+    <div class="card">
+      <h2>1. Final design decision</h2>
+      <p class="lead">
+        The classic ESP32-WROOM-32 was rejected for this exact project because an 8-channel
+        analog sensor consumes more ADC1 inputs than the classic ESP32 has while Wi-Fi is active.
+        The new design uses <b>ESP32-S3</b>, whose ADC1 covers GPIO1–GPIO10. Eight of those channels
+        are used for the QTR array, leaving plenty of normal GPIOs for the driver, servo, buzzer and I²C.
+      </p>
+
+      <div class="goodbox">
+        <b>Why this is the correction:</b> do not force a classic ESP32 to read eight analog QTR channels
+        through ADC2 while Wi-Fi is running. The ESP32-S3 gives us eight clean ADC1 channels for the sensor
+        and additional GPIOs for the rest of the robot.
+      </div>
+
+      <div class="grid3" style="margin-top:16px">
+        <div class="kpi"><div class="v">1</div><div class="l">ESP board</div></div>
+        <div class="kpi"><div class="v">8</div><div class="l">Analog line channels</div></div>
+        <div class="kpi"><div class="v">0</div><div class="l">Boot-strapping GPIOs used</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="architecture">
+    <div class="card">
+      <h2>2. System architecture</h2>
+      <div class="diagram">
+        <svg viewBox="0 0 1100 530" role="img" aria-label="System block diagram">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#2457d6"/>
+            </marker>
+            <marker id="arrowG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#0f8b8d"/>
+            </marker>
+          </defs>
+          <rect x="35" y="60" width="180" height="90" rx="16" fill="#eef3ff" stroke="#b8c9ee"/>
+          <text x="125" y="97" text-anchor="middle" font-weight="800" fill="#17356f">2S 7.4 V BATTERY</text>
+          <text x="125" y="120" text-anchor="middle" fill="#51637c">Fuse + switch</text>
+
+          <rect x="285" y="28" width="215" height="92" rx="16" fill="#edf9f3" stroke="#b7dfc7"/>
+          <text x="392" y="64" text-anchor="middle" font-weight="800" fill="#166d48">6 V HIGH-CURRENT RAIL</text>
+          <text x="392" y="88" text-anchor="middle" fill="#51637c">XL4015 → TB6612 + servo</text>
+
+          <rect x="285" y="154" width="215" height="92" rx="16" fill="#f5f2ff" stroke="#d2c6ee"/>
+          <text x="392" y="190" text-anchor="middle" font-weight="800" fill="#5d3b9c">5 V LOGIC RAIL</text>
+          <text x="392" y="214" text-anchor="middle" fill="#51637c">LM2596 → ESP32-S3 5V</text>
+
+          <rect x="560" y="112" width="220" height="132" rx="18" fill="#0c1730" stroke="#28436f"/>
+          <text x="670" y="150" text-anchor="middle" font-weight="900" font-size="18" fill="#fff">ESP32-S3</text>
+          <text x="670" y="174" text-anchor="middle" fill="#cad7ef">Wi-Fi • Web UI • PID</text>
+          <text x="670" y="198" text-anchor="middle" fill="#cad7ef">Calibration • Safety states</text>
+          <text x="670" y="222" text-anchor="middle" fill="#cad7ef">One controller</text>
+
+          <rect x="840" y="30" width="220" height="110" rx="16" fill="#fff7e7" stroke="#efd6a4"/>
+          <text x="950" y="67" text-anchor="middle" font-weight="800" fill="#8d5600">QTR-MD-08A</text>
+          <text x="950" y="90" text-anchor="middle" fill="#51637c">8 analog channels</text>
+          <text x="950" y="113" text-anchor="middle" fill="#51637c">5 mm nominal sensing distance</text>
+
+          <rect x="840" y="166" width="220" height="90" rx="16" fill="#eefbf9" stroke="#b7ded9"/>
+          <text x="950" y="202" text-anchor="middle" font-weight="800" fill="#0d6668">TB6612FNG</text>
+          <text x="950" y="225" text-anchor="middle" fill="#51637c">2 DC motor channels</text>
+
+          <rect x="840" y="281" width="220" height="76" rx="16" fill="#f4f7fb" stroke="#cbd5e1"/>
+          <text x="950" y="312" text-anchor="middle" font-weight="800">MG90S</text>
+          <text x="950" y="334" text-anchor="middle" fill="#51637c">medicine hatch servo</text>
+
+          <rect x="840" y="382" width="220" height="76" rx="16" fill="#f4f7fb" stroke="#cbd5e1"/>
+          <text x="950" y="413" text-anchor="middle" font-weight="800">VL53L0X + BUZZER</text>
+          <text x="950" y="435" text-anchor="middle" fill="#51637c">optional obstacle alert</text>
+
+          <rect x="560" y="304" width="220" height="96" rx="16" fill="#eef3ff" stroke="#b8c9ee"/>
+          <text x="670" y="338" text-anchor="middle" font-weight="800" fill="#17356f">2WD CHASSIS</text>
+          <text x="670" y="362" text-anchor="middle" fill="#51637c">2 geared motors + caster</text>
+          <text x="670" y="382" text-anchor="middle" fill="#51637c">acrylic car body</text>
+
+          <line x1="215" y1="105" x2="285" y2="75" stroke="#0f8b8d" stroke-width="3" marker-end="url(#arrowG)"/>
+          <line x1="215" y1="105" x2="285" y2="200" stroke="#2457d6" stroke-width="3" marker-end="url(#arrow)"/>
+          <line x1="500" y1="75" x2="840" y2="210" stroke="#0f8b8d" stroke-width="3" marker-end="url(#arrowG)"/>
+          <line x1="500" y1="75" x2="840" y2="320" stroke="#0f8b8d" stroke-width="3" marker-end="url(#arrowG)"/>
+          <line x1="500" y1="200" x2="560" y2="185" stroke="#2457d6" stroke-width="3" marker-end="url(#arrow)"/>
+          <line x1="780" y1="170" x2="840" y2="85" stroke="#2457d6" stroke-width="3" marker-end="url(#arrow)"/>
+          <line x1="780" y1="210" x2="840" y2="210" stroke="#0f8b8d" stroke-width="3" marker-end="url(#arrowG)"/>
+          <line x1="780" y1="223" x2="840" y2="415" stroke="#2457d6" stroke-width="3" marker-end="url(#arrow)"/>
+          <line x1="670" y1="244" x2="670" y2="304" stroke="#2457d6" stroke-width="3" marker-end="url(#arrow)"/>
+          <line x1="780" y1="205" x2="840" y2="415" stroke="#2457d6" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#arrow)"/>
+          <text x="95" y="185" fill="#51637c" font-size="12">COMMON GROUND FOR ALL MODULES</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section id="bom">
+    <div class="card">
+      <h2>3. Cost-effective UAE buy list</h2>
+      <p class="lead">Buy the base build first. The obstacle sensor is optional. Prices are UAE reference prices found during this research; marketplace checkout prices can change.</p>
+
+      <table>
+        <thead>
+          <tr><th>Part</th><th>Qty</th><th>Why this part</th><th>Reference price</th><th>Links</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><b>ESP32-S3-DevKitC-1 N8R8</b><br><span class="muted">ESP32-S3-WROOM-1</span></td>
+            <td>1</td>
+            <td>Enough ADC1/GPIOs to run 8 analog sensors + motor driver + servo + I²C without the classic ESP32 ADC2/Wi-Fi conflict.</td>
+            <td class="price">AED 88</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=ESP32-S3-DevKitC-1+N8R8" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://www.desertcart.ae/products/433112409-esp32-s3-devkitc-1-n8r8-development-board" target="_blank">UAE reference</a>
+              <a class="linkbtn" href="https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.0.html" target="_blank">Official docs</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>Pololu QTR-MD-08A</b></td>
+            <td>1</td>
+            <td>8 analog reflectance channels; 2.9–5.5 V; output 0–VCC; Active + Preferred; 5 mm optimal distance.</td>
+            <td class="price">US$ 9.90<br><span class="muted">UAE varies</span></td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=Pololu+QTR-MD-08A" target="_blank">Amazon UAE search</a>
+              <a class="linkbtn" href="https://www.pololu.com/product/4248" target="_blank">Pololu</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>TB6612FNG</b></td>
+            <td>1</td>
+            <td>Two brushed-DC motor channels; logic supply 2.7–5.5 V; motor supply up to 13.5 V. Use 6 V motor rail here.</td>
+            <td class="price">AED 30.50</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=TB6612FNG+dual+motor+driver" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://www.noon.com/uae-en/tb6612fng-h-bridge-module-1-2a-2-channels/ZFB1EA62A0982AEC0618FZ/p/" target="_blank">UAE reference</a>
+              <a class="linkbtn" href="https://toshiba.semicon-storage.com/info/TB6612FNG_datasheet_en_20141001.pdf?did=10660&prodName=TB6612FNG" target="_blank">Datasheet</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>2WD acrylic smart-car chassis kit</b></td>
+            <td>1</td>
+            <td>Complete car body: chassis plate, 2 geared DC motors, 2 wheels, caster and mounting hardware. Encoder version is a bonus, but we do not need encoder inputs for the base build.</td>
+            <td class="price">AED 35</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=2WD+smart+robot+car+chassis+kit+motors+wheels" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://besomi.com/ae_en/2wd-car-kit-motor-smart-robot-car-chassis-kit-speed-encoder-battery-box-2wd-tracking-obstacle-avoidance-intelligent-car-diy-kit-for-arduino-diy-smart-car-robot-chassis-with-motors-and-wheels-dear0003.html" target="_blank">Besomi</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>MG90S metal-gear servo</b></td>
+            <td>1</td>
+            <td>4.8–6 V; use for the medicine-box latch/hatch.</td>
+            <td class="price">AED 18</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=MG90S+metal+gear+servo" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://besomi.com/ae_en/mg90s-9g-servo-motor-tpmp0008.html" target="_blank">Besomi</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>2S 7.4 V 2200 mAh LiPo, 35C, T-Plug</b></td>
+            <td>1</td>
+            <td>High-current battery suited to two small motors. Prefer a reputable pack; inspect it before use.</td>
+            <td class="price">~AED 42–50</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=2S+7.4V+2200mAh+35C+LiPo+T+plug" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://www.noon.com/uae-en/toys-and-games/toy-remote-control-and-play-vehicles/rc-vehicles-and-batteries/ts-ae-en-rechargeable-batteries/" target="_blank">Noon UAE</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>XL4015 5 A buck converter</b></td>
+            <td>1</td>
+            <td>Set to 6.0 V for the motor driver VM and servo rail.</td>
+            <td class="price">AED 39</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=XL4015+5A+buck+converter" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://www.desertcart.ae/products/155874025-jacobsparts-xl4015-5a-dc-dc-buck-step-down-voltage-converter" target="_blank">UAE reference</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>LM2596 buck converter</b></td>
+            <td>1</td>
+            <td>Set to 5.0 V for the ESP32-S3 5V input.</td>
+            <td class="price">AED 13</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=LM2596+buck+converter" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://besomi.com/ae_en/depd0023-lm2596-dc-dc-step-down-power-supply-module-input-4v-35v-output-125v-30v.html" target="_blank">Besomi</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>2S LiPo balance charger</b></td>
+            <td>1</td>
+            <td>Do not charge a LiPo with a generic single-cell USB board. A simple 2S/3S balance charger is enough for this project.</td>
+            <td class="price">~AED 40</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=2S+LiPo+balance+charger+B3" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://mytoyshops.com/products/b3-pro-compact-lipo-battery-balance-charger-2s-3s-7-4v-11-1v-rc-battery-charger" target="_blank">UAE reference</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>470 µF 25–50 V electrolytic capacitor</b></td>
+            <td>2</td>
+            <td>Bulk smoothing: place near the TB6612/motor rail and the servo rail.</td>
+            <td class="price">AED 1.50 each</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=470uF+50V+electrolytic+capacitor" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://besomi.com/ae_en/pccx0124-470uf-electrolytic-capacitor-50v-20-radial-through-hole-aluminum.html" target="_blank">Besomi</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>100 nF ceramic capacitors</b></td>
+            <td>4+</td>
+            <td>Motor noise suppression and local decoupling.</td>
+            <td class="price">~AED 0.50+</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=100nF+ceramic+capacitor+50V" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://besomi.com/ae_en/passive-components/capacitors.html" target="_blank">Besomi</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>5 A fuse + holder + master switch</b></td>
+            <td>1 set</td>
+            <td>Protect the battery wiring and give the robot a hard power-off.</td>
+            <td class="price">~AED 10–20</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=5A+fuse+holder+DC+switch" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://besomi.com/ae_en/cpfx0004-glass-fuse-5a-5x20mm.html" target="_blank">Fuse reference</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>Wire, JST/Dupont, heat-shrink, perfboard/terminal blocks</b></td>
+            <td>1 pack</td>
+            <td>Final wiring should be soldered/secured; keep motor current wiring short and thicker than signal wiring.</td>
+            <td class="price">~AED 25–50</td>
+            <td><a class="linkbtn" href="https://www.amazon.ae/s?k=robotics+wire+JST+Dupont+heat+shrink+kit" target="_blank">Amazon UAE</a></td>
+          </tr>
+          <tr>
+            <td><b>Optional: VL53L0X ToF sensor</b></td>
+            <td>1</td>
+            <td>Simple I²C obstacle detector; not required for basic line following.</td>
+            <td class="price">~AED 14–25</td>
+            <td>
+              <a class="linkbtn" href="https://www.amazon.ae/s?k=VL53L0X+I2C+distance+sensor" target="_blank">Amazon UAE</a>
+              <a class="linkbtn" href="https://www.desertcart.ae/products/607762318-4pcs-vl53l0x-time-of-flight-tof-laser-ranging-sensor-breakout" target="_blank">UAE reference</a>
+            </td>
+          </tr>
+          <tr>
+            <td><b>Optional: passive 5 V buzzer</b></td>
+            <td>1</td>
+            <td>Audible line-lost/obstacle/delivery alert. Use a transistor driver for a larger buzzer.</td>
+            <td class="price">~AED 5–10</td>
+            <td><a class="linkbtn" href="https://www.amazon.ae/s?k=5V+passive+buzzer+module+Arduino" target="_blank">Amazon UAE</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="warnbox" style="margin-top:14px">
+        <b>Do not buy the old L293D shield.</b> It adds avoidable voltage loss and heat. Also avoid the very cheap
+        8-channel TCRT5000 threshold boards for the final build; the QTR array gives calibrated per-channel information
+        and is a better fit for PID line tracking.
+      </div>
+    </div>
+  </section>
+
+  <section id="wiring">
+    <div class="card">
+      <h2>4. Verified ESP32-S3 pin map</h2>
+      <p class="lead">This map is intentionally conservative. It avoids ESP32-S3 strap pins GPIO0, GPIO3, GPIO45 and GPIO46, and avoids USB-JTAG GPIO19/20 and flash/PSRAM-reserved GPIO26–37.</p>
+
+      <div class="pinmap">
+        <div class="pin"><code>GPIO1</code><small>QTR OUT1 — ADC1_CH0</small></div>
+        <div class="pin"><code>GPIO2</code><small>QTR OUT2 — ADC1_CH1</small></div>
+        <div class="pin"><code>GPIO4</code><small>QTR OUT3 — ADC1_CH3</small></div>
+        <div class="pin"><code>GPIO5</code><small>QTR OUT4 — ADC1_CH4</small></div>
+        <div class="pin"><code>GPIO6</code><small>QTR OUT5 — ADC1_CH5</small></div>
+        <div class="pin"><code>GPIO7</code><small>QTR OUT6 — ADC1_CH6</small></div>
+        <div class="pin"><code>GPIO8</code><small>QTR OUT7 — ADC1_CH7</small></div>
+        <div class="pin"><code>GPIO9</code><small>QTR OUT8 — ADC1_CH8</small></div>
+        <div class="pin"><code>GPIO10</code><small>TB6612 AIN1</small></div>
+        <div class="pin"><code>GPIO11</code><small>TB6612 AIN2</small></div>
+        <div class="pin"><code>GPIO12</code><small>TB6612 BIN1</small></div>
+        <div class="pin"><code>GPIO13</code><small>TB6612 BIN2</small></div>
+        <div class="pin"><code>GPIO14</code><small>TB6612 PWMA</small></div>
+        <div class="pin"><code>GPIO15</code><small>TB6612 PWMB</small></div>
+        <div class="pin"><code>GPIO16</code><small>Servo signal</small></div>
+        <div class="pin"><code>GPIO17</code><small>Buzzer signal</small></div>
+        <div class="pin"><code>GPIO18</code><small>VL53L0X SDA</small></div>
+        <div class="pin"><code>GPIO21</code><small>VL53L0X SCL</small></div>
+      </div>
+
+      <div class="grid2" style="margin-top:18px">
+        <div>
+          <h3>TB6612FNG</h3>
+          <table>
+            <tr><td>VCC</td><td><b>3.3 V</b> from ESP32-S3</td></tr>
+            <tr><td>VM</td><td><b>6.0 V</b> from XL4015</td></tr>
+            <tr><td>STBY</td><td><b>3.3 V directly</b> (no GPIO needed)</td></tr>
+            <tr><td>AIN1 / AIN2</td><td>GPIO10 / GPIO11</td></tr>
+            <tr><td>BIN1 / BIN2</td><td>GPIO12 / GPIO13</td></tr>
+            <tr><td>PWMA / PWMB</td><td>GPIO14 / GPIO15</td></tr>
+            <tr><td>AO1/AO2</td><td>Left motor</td></tr>
+            <tr><td>BO1/BO2</td><td>Right motor</td></tr>
+          </table>
+        </div>
+        <div>
+          <h3>QTR-MD-08A</h3>
+          <table>
+            <tr><td>VCC</td><td><b>3.3 V</b></td></tr>
+            <tr><td>GND</td><td>Common GND</td></tr>
+            <tr><td>OUT1–OUT8</td><td>GPIO1,2,4,5,6,7,8,9</td></tr>
+            <tr><td>Emitter control</td><td>Leave per QTR board configuration; no boot pin.</td></tr>
+          </table>
+          <div class="note" style="margin-top:10px">
+            The QTR-MD-08A outputs 0–VCC. Power it from 3.3 V so the analog outputs stay inside the ESP32-S3 ADC supply domain.
+          </div>
+        </div>
+      </div>
+
+      <h3>Clean wiring diagram</h3>
+      <div class="diagram">
+        <svg viewBox="0 0 1100 600" role="img" aria-label="Detailed wiring diagram">
+          <rect x="40" y="50" width="210" height="90" rx="14" fill="#eef3ff" stroke="#b8c9ee"/>
+          <text x="145" y="86" text-anchor="middle" font-weight="900">ESP32-S3</text>
+          <text x="145" y="109" text-anchor="middle" fill="#51637c">DevKitC-1 N8R8</text>
+
+          <rect x="40" y="190" width="210" height="135" rx="14" fill="#fff7e7" stroke="#efd6a4"/>
+          <text x="145" y="225" text-anchor="middle" font-weight="900">QTR-MD-08A</text>
+          <text x="145" y="248" text-anchor="middle" fill="#51637c">OUT1..8 → GPIO1,2,4,5,6,7,8,9</text>
+          <text x="145" y="271" text-anchor="middle" fill="#51637c">VCC → 3.3V</text>
+          <text x="145" y="294" text-anchor="middle" fill="#51637c">GND → GND</text>
+
+          <rect x="385" y="75" width="270" height="180" rx="14" fill="#eefbf9" stroke="#b7ded9"/>
+          <text x="520" y="110" text-anchor="middle" font-weight="900">TB6612FNG</text>
+          <text x="520" y="136" text-anchor="middle" fill="#51637c">AIN1 GPIO10</text>
+          <text x="520" y="156" text-anchor="middle" fill="#51637c">AIN2 GPIO11</text>
+          <text x="520" y="176" text-anchor="middle" fill="#51637c">BIN1 GPIO12</text>
+          <text x="520" y="196" text-anchor="middle" fill="#51637c">BIN2 GPIO13</text>
+          <text x="520" y="216" text-anchor="middle" fill="#51637c">PWMA GPIO14 • PWMB GPIO15</text>
+          <text x="520" y="236" text-anchor="middle" fill="#51637c">STBY → 3.3V</text>
+
+          <rect x="755" y="55" width="150" height="80" rx="14" fill="#f4f7fb" stroke="#cbd5e1"/>
+          <text x="830" y="90" text-anchor="middle" font-weight="900">LEFT MOTOR</text>
+          <text x="830" y="112" text-anchor="middle" fill="#51637c">AO1 / AO2</text>
+
+          <rect x="925" y="55" width="150" height="80" rx="14" fill="#f4f7fb" stroke="#cbd5e1"/>
+          <text x="1000" y="90" text-anchor="middle" font-weight="900">RIGHT MOTOR</text>
+          <text x="1000" y="112" text-anchor="middle" fill="#51637c">BO1 / BO2</text>
+
+          <rect x="385" y="310" width="270" height="110" rx="14" fill="#edf9f3" stroke="#b7dfc7"/>
+          <text x="520" y="345" text-anchor="middle" font-weight="900">POWER</text>
+          <text x="520" y="369" text-anchor="middle" fill="#51637c">Battery → Fuse → Switch</text>
+          <text x="520" y="391" text-anchor="middle" fill="#51637c">→ XL4015 6V → VM + Servo</text>
+
+          <rect x="40" y="375" width="210" height="75" rx="14" fill="#f5f2ff" stroke="#d2c6ee"/>
+          <text x="145" y="409" text-anchor="middle" font-weight="900">LM2596</text>
+          <text x="145" y="432" text-anchor="middle" fill="#51637c">5.0V → ESP32 5V</text>
+
+          <rect x="755" y="190" width="320" height="115" rx="14" fill="#f4f7fb" stroke="#cbd5e1"/>
+          <text x="915" y="225" text-anchor="middle" font-weight="900">SERVO</text>
+          <text x="915" y="248" text-anchor="middle" fill="#51637c">Signal GPIO16 • 6V supply • common GND</text>
+          <text x="915" y="272" text-anchor="middle" fill="#51637c">Use MG90S for medicine-box hatch</text>
+
+          <rect x="755" y="335" width="320" height="115" rx="14" fill="#f4f7fb" stroke="#cbd5e1"/>
+          <text x="915" y="370" text-anchor="middle" font-weight="900">OPTIONAL</text>
+          <text x="915" y="393" text-anchor="middle" fill="#51637c">VL53L0X: SDA GPIO18 • SCL GPIO21</text>
+          <text x="915" y="417" text-anchor="middle" fill="#51637c">Buzzer: GPIO17</text>
+
+          <line x1="250" y1="95" x2="385" y2="125" stroke="#2457d6" stroke-width="3"/>
+          <line x1="250" y1="245" x2="350" y2="185" stroke="#2457d6" stroke-width="3"/>
+          <line x1="655" y1="145" x2="755" y2="95" stroke="#0f8b8d" stroke-width="3"/>
+          <line x1="655" y1="175" x2="925" y2="95" stroke="#0f8b8d" stroke-width="3"/>
+          <line x1="250" y1="412" x2="385" y2="365" stroke="#2457d6" stroke-width="3"/>
+          <line x1="520" y1="420" x2="520" y2="475" stroke="#0f8b8d" stroke-width="3"/>
+          <line x1="655" y1="220" x2="755" y2="235" stroke="#2457d6" stroke-width="3"/>
+          <line x1="250" y1="105" x2="385" y2="340" stroke="#777" stroke-width="2" stroke-dasharray="6 5"/>
+          <line x1="655" y1="365" x2="755" y2="365" stroke="#2457d6" stroke-width="3"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <section id="power">
+    <div class="card">
+      <h2>5. Power system — the reliability fix</h2>
+      <p class="lead">The old project shared the battery between the Arduino and motor system. The rebuild keeps one common ground, but gives the motors/servo and the ESP32 separate regulated rails.</p>
+
+      <div class="grid2">
+        <div class="diagram">
+          <div class="diagram-title">Power tree</div>
+          <svg viewBox="0 0 900 440">
+            <rect x="40" y="165" width="150" height="80" rx="12" fill="#eef3ff" stroke="#b8c9ee"/>
+            <text x="115" y="198" text-anchor="middle" font-weight="900">2S LiPo</text>
+            <text x="115" y="220" text-anchor="middle" fill="#51637c">7.4 V nominal</text>
+            <rect x="250" y="135" width="170" height="70" rx="12" fill="#edf9f3" stroke="#b7dfc7"/>
+            <text x="335" y="176" text-anchor="middle" font-weight="900">XL4015</text>
+            <text x="335" y="196" text-anchor="middle" fill="#51637c">6.0 V rail</text>
+            <rect x="250" y="235" width="170" height="70" rx="12" fill="#f5f2ff" stroke="#d2c6ee"/>
+            <text x="335" y="276" text-anchor="middle" font-weight="900">LM2596</text>
+            <text x="335" y="296" text-anchor="middle" fill="#51637c">5.0 V rail</text>
+            <rect x="510" y="100" width="160" height="70" rx="12" fill="#eefbf9" stroke="#b7ded9"/>
+            <text x="590" y="141" text-anchor="middle" font-weight="900">TB6612 VM</text>
+            <text x="590" y="161" text-anchor="middle" fill="#51637c">motors</text>
+            <rect x="510" y="185" width="160" height="70" rx="12" fill="#eefbf9" stroke="#b7ded9"/>
+            <text x="590" y="226" text-anchor="middle" font-weight="900">MG90S</text>
+            <text x="590" y="246" text-anchor="middle" fill="#51637c">servo</text>
+            <rect x="510" y="270" width="160" height="70" rx="12" fill="#0c1730" stroke="#28436f"/>
+            <text x="590" y="311" text-anchor="middle" font-weight="900" fill="#fff">ESP32-S3</text>
+            <text x="590" y="331" text-anchor="middle" fill="#cad7ef">5 V input</text>
+            <line x1="190" y1="205" x2="250" y2="170" stroke="#0f8b8d" stroke-width="3"/>
+            <line x1="190" y1="205" x2="250" y2="270" stroke="#2457d6" stroke-width="3"/>
+            <line x1="420" y1="170" x2="510" y2="135" stroke="#0f8b8d" stroke-width="3"/>
+            <line x1="420" y1="170" x2="510" y2="220" stroke="#0f8b8d" stroke-width="3"/>
+            <line x1="420" y1="270" x2="510" y2="305" stroke="#2457d6" stroke-width="3"/>
+            <text x="50" y="310" fill="#51637c" font-size="12">Fuse + switch before both rails</text>
+            <text x="50" y="332" fill="#51637c" font-size="12">Common GND returns to battery/power point</text>
+          </svg>
+        </div>
+
+        <div>
+          <h3>Mandatory reliability rules</h3>
+          <ul class="smalllist">
+            <li>Do not power the motors from an ESP32 pin.</li>
+            <li>Do not feed 7.4–8.4 V directly into a 6 V motor/servo rail.</li>
+            <li>Set each adjustable buck with a multimeter <b>before</b> connecting the electronics.</li>
+            <li>Use a 470–1000 µF electrolytic near the motor driver/servo rail.</li>
+            <li>Place a 100 nF ceramic capacitor across each brushed motor's terminals.</li>
+            <li>Keep motor wires short and physically separate from sensor signal wiring.</li>
+            <li>Use soldered/secure connectors in the final robot; avoid crocodile clips for power.</li>
+            <li>All modules share GND, but motor current should not return through the ESP32 wiring.</li>
+          </ul>
+
+          <div class="warnbox">
+            <b>USB warning:</b> Espressif specifies mutually exclusive power paths for the DevKit's external
+            5 V/3.3 V headers versus USB power. During standalone operation, power from the 5 V buck; during
+            USB programming/debug, disconnect the battery-powered 5 V rail unless your exact board/setup provides
+            appropriate power isolation.
+          </div>
+
+          <div class="goodbox" style="margin-top:12px">
+            <b>Software rule:</b> Wi-Fi connection must never block startup. The robot boots hardware first,
+            creates its local access point/web server, and continues operating even if the phone is not connected.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pid">
+    <div class="card">
+      <h2>6. Sensor calibration + PID</h2>
+      <div class="grid2">
+        <div>
+          <h3>Calibration sequence</h3>
+          <div class="step"><div class="num">1</div><div><b>Start CALIBRATION.</b><br><span class="muted">Keep the motors stopped.</span></div></div>
+          <div class="step"><div class="num">2</div><div><b>Sweep the sensor across white and black.</b><br><span class="muted">Move left ↔ right for several seconds so every sensor sees both surfaces.</span></div></div>
+          <div class="step"><div class="num">3</div><div><b>Store per-channel minimum/maximum.</b><br><span class="muted">Use calibrated readings rather than fixed raw thresholds.</span></div></div>
+          <div class="step"><div class="num">4</div><div><b>Save to flash.</b><br><span class="muted">Next startup keeps the calibration until recalibrated.</span></div></div>
+        </div>
+
+        <div>
+          <h3>PID tuning order</h3>
+          <div class="step"><div class="num">A</div><div><b>Ki = 0</b><br><span class="muted">Start with proportional + derivative control.</span></div></div>
+          <div class="step"><div class="num">B</div><div><b>Raise Kp gradually.</b><br><span class="muted">Stop increasing when oscillation around the line becomes obvious.</span></div></div>
+          <div class="step"><div class="num">C</div><div><b>Raise Kd.</b><br><span class="muted">Use it to damp the oscillation and improve corner recovery.</span></div></div>
+          <div class="step"><div class="num">D</div><div><b>Adjust base speed last.</b><br><span class="muted">Sharp error → lower speed automatically.</span></div></div>
+        </div>
+      </div>
+
+      <h3>Phone web UI</h3>
+      <div class="code">
+SMART NURSING ROBOT
+────────────────────────────────────────
+Mode: LINE FOLLOW
+
+Kp      [ 45.0 ]    Ki [ 0.0 ]    Kd [ 22.0 ]
+Base    [ 150  ]    Max [ 220 ]
+
+[ CALIBRATE ]   [ APPLY ]   [ SAVE ]
+
+Sensor 1  ████████
+Sensor 2  ██████████
+...
+Sensor 8  ███
+
+Battery: 7.5 V
+Obstacle: CLEAR
+Line: TRACKING
+        </div>
+
+      <div class="note" style="margin-top:12px">
+        The QTR library provides calibrated readings and line-position functions. The controller should use the
+        calibrated line position rather than manually tuned binary thresholds.
+      </div>
+    </div>
+  </section>
+
+  <section id="recovery">
+    <div class="card">
+      <h2>7. Line-loss recovery</h2>
+      <div class="grid3">
+        <div class="kpi"><div class="v">TRACK</div><div class="l">normal PID</div></div>
+        <div class="kpi"><div class="v">SEARCH</div><div class="l">last known direction</div></div>
+        <div class="kpi"><div class="v">STOP</div><div class="l">timeout safety state</div></div>
+      </div>
+      <p class="lead" style="margin-top:14px">
+        When all sensors lose the line, do not simply keep driving forward. Remember the last error direction,
+        slow down, search toward that side, and stop with an alert if the line is not recovered within a short timeout.
+      </p>
+    </div>
+  </section>
+
+  <section id="chassis">
+    <div class="card">
+      <h2>8. Car body + medicine box</h2>
+      <p class="lead">The base chassis is the inexpensive 2WD acrylic smart-car body. Add a lightweight upper deck for electronics and a small medicine compartment above the rear/center.</p>
+
+      <div class="diagram">
+        <svg viewBox="0 0 1100 520" role="img" aria-label="Top-view chassis and medicine box layout">
+          <rect x="160" y="60" width="780" height="380" rx="30" fill="#e9edf3" stroke="#7c899d" stroke-width="3"/>
+          <text x="550" y="96" text-anchor="middle" font-size="18" font-weight="900">ACRYLIC 2WD CHASSIS / CAR BODY</text>
+
+          <circle cx="250" cy="265" r="78" fill="#2f3a4d"/>
+          <circle cx="850" cy="265" r="78" fill="#2f3a4d"/>
+          <text x="250" y="270" text-anchor="middle" fill="#fff" font-weight="900">L MOTOR</text>
+          <text x="850" y="270" text-anchor="middle" fill="#fff" font-weight="900">R MOTOR</text>
+
+          <rect x="415" y="145" width="270" height="90" rx="16" fill="#fff7e7" stroke="#d7ae58" stroke-width="2"/>
+          <text x="550" y="182" text-anchor="middle" font-weight="900">QTR-MD-08A</text>
+          <text x="550" y="205" text-anchor="middle" fill="#51637c">front sensor bar • ~5 mm from floor</text>
+
+          <rect x="430" y="275" width="240" height="80" rx="16" fill="#0c1730" stroke="#28436f"/>
+          <text x="550" y="308" text-anchor="middle" fill="#fff" font-weight="900">ESP32-S3 + POWER</text>
+          <text x="550" y="331" text-anchor="middle" fill="#cad7ef">mount above chassis</text>
+
+          <rect x="445" y="370" width="210" height="52" rx="13" fill="#eef3ff" stroke="#b8c9ee"/>
+          <text x="550" y="402" text-anchor="middle" font-weight="900">MEDICINE BOX</text>
+
+          <rect x="670" y="373" width="110" height="45" rx="10" fill="#edf9f3" stroke="#b7dfc7"/>
+          <text x="725" y="401" text-anchor="middle" font-size="12" font-weight="900">MG90S LATCH</text>
+
+          <circle cx="550" cy="455" r="22" fill="#c8d0db" stroke="#7c899d" stroke-width="2"/>
+          <text x="550" y="490" text-anchor="middle" fill="#51637c">front caster/support</text>
+
+          <text x="550" y="126" text-anchor="middle" fill="#2457d6" font-weight="900">FRONT / LINE SENSOR</text>
+          <text x="550" y="450" text-anchor="middle" fill="#51637c" opacity=".0">x</text>
+        </svg>
+      </div>
+
+      <div class="grid2" style="margin-top:16px">
+        <div>
+          <h3>Mechanical priorities</h3>
+          <ul class="smalllist">
+            <li>Sensor board must be rigid and parallel to the floor.</li>
+            <li>Keep the sensor centered on the robot's longitudinal centerline.</li>
+            <li>Keep the battery low to reduce tipping and wheel lift.</li>
+            <li>Keep the medicine box lightweight.</li>
+            <li>Protect the QTR board with a small dark hood/skirt from stray light.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Suggested track</h3>
+          <ul class="smalllist">
+            <li>Matte white background.</li>
+            <li>Matte black tape line, consistent width.</li>
+            <li>No shiny floor for the first tuning sessions.</li>
+            <li>Start with wide curves before sharp corners.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="assembly">
+    <div class="card">
+      <h2>9. Assembly order</h2>
+      <div class="step"><div class="num">1</div><div><b>Build the 2WD body.</b><br><span class="muted">Install motors, wheels and caster. Mount the QTR board at the front.</span></div></div>
+      <div class="step"><div class="num">2</div><div><b>Build the power section separately.</b><br><span class="muted">Battery → fuse → switch → both buck converters. Set 6.0 V and 5.0 V with a multimeter before connecting loads.</span></div></div>
+      <div class="step"><div class="num">3</div><div><b>Connect TB6612 + motors.</b><br><span class="muted">Power the driver logic from 3.3 V and the motor rail from 6.0 V.</span></div></div>
+      <div class="step"><div class="num">4</div><div><b>Connect the QTR array.</b><br><span class="muted">All eight outputs go to the S3 ADC1 pins listed above.</span></div></div>
+      <div class="step"><div class="num">5</div><div><b>Connect the servo and optional sensors.</b><br><span class="muted">Servo gets 6 V; I²C sensors stay on the 3.3 V logic side.</span></div></div>
+      <div class="step"><div class="num">6</div><div><b>Upload firmware with USB power only.</b><br><span class="muted">Do the first firmware test with motors disconnected.</span></div></div>
+      <div class="step"><div class="num">7</div><div><b>Test each subsystem independently.</b><br><span class="muted">Sensor → motor driver → servo → web UI → full robot.</span></div></div>
+    </div>
+  </section>
+
+  <section id="testing">
+    <div class="card">
+      <h2>10. Pre-power + test checklist</h2>
+      <div class="grid2">
+        <div>
+          <h3>Before connecting the battery</h3>
+          <ul class="smalllist">
+            <li>☐ Battery is a 2S LiPo and not damaged/swollen.</li>
+            <li>☐ Fuse is installed.</li>
+            <li>☐ Main switch is OFF.</li>
+            <li>☐ XL4015 output measured at 6.0 V.</li>
+            <li>☐ LM2596 output measured at 5.0 V.</li>
+            <li>☐ QTR VCC is 3.3 V.</li>
+            <li>☐ No accidental short between 5 V, 6 V and 3.3 V rails.</li>
+            <li>☐ Common GND is connected.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Test order</h3>
+          <ul class="smalllist">
+            <li>☐ ESP32 boots with motors disconnected.</li>
+            <li>☐ Serial reports the reset reason.</li>
+            <li>☐ Phone can connect to the robot's Wi-Fi AP.</li>
+            <li>☐ Live sensor bars respond to black/white.</li>
+            <li>☐ Motor 1 direction verified.</li>
+            <li>☐ Motor 2 direction verified.</li>
+            <li>☐ Servo opens/closes the hatch.</li>
+            <li>☐ Calibration completes.</li>
+            <li>☐ Low-speed straight line test.</li>
+            <li>☐ Curve test → sharp corner test → full route.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="warnbox" style="margin-top:16px">
+        <b>What a reset means:</b> if the ESP32 restarts when motors/servo start, inspect the power system first.
+        A voltage dip/brownout or noisy return path is more likely than a mysterious PID problem.
+      </div>
+    </div>
+  </section>
+
+  <section id="problems">
+    <div class="card">
+      <h2>11. Known problems and the planned fixes</h2>
+      <table>
+        <thead><tr><th>Old failure</th><th>Likely cause</th><th>New fix</th></tr></thead>
+        <tbody>
+          <tr><td>PID changed only by reflashing</td><td>Parameters hard-coded in firmware</td><td>Web UI parameters + persistent save</td></tr>
+          <tr><td>Robot leaves the line</td><td>Sensor geometry, poor calibration, speed, motor mismatch, or line-loss behavior</td><td>QTR array + calibration + speed scheduling + line-loss recovery</td></tr>
+          <tr><td>ESP32/Arduino loops at startup</td><td>Brownout/noisy power or blocking Wi-Fi startup</td><td>Separate rails + bulk caps + no blocking Wi-Fi connect</td></tr>
+          <tr><td>Sometimes only some parts work</td><td>Loose clips, poor grounds, rail sag, current spikes</td><td>Soldered distribution + common ground + measured buck outputs</td></tr>
+          <tr><td>8-channel analog sensor vs classic ESP32</td><td>Classic ESP32 has only six ADC1 channels suitable for Wi-Fi-safe analog reads</td><td>ESP32-S3 ADC1 GPIO1–10</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="sources">
+    <div class="card">
+      <h2>12. Research sources</h2>
+      <p class="lead">The final plan was checked against manufacturer documentation and recent community/project examples. Product prices below are market references, not guarantees of future checkout totals.</p>
+      <ul class="smalllist">
+        <li><b>Espressif ESP32-S3-DevKitC-1:</b> official board header map, power options, and GPIO availability. <a href="https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/user_guide_v1.0.html" target="_blank">Open docs</a></li>
+        <li><b>Espressif S3 hardware guide:</b> ADC1 = GPIO1–10; GPIO0/3/45/46 are strapping pins; USB-JTAG defaults on GPIO19/20. <a href="https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32s3/schematic-checklist.html" target="_blank">Open guide</a></li>
+        <li><b>Pololu QTR-MD-08A:</b> 8 analog channels, 2.9–5.5 V, 0–VCC outputs, 5 mm optimal range, Active + Preferred. <a href="https://www.pololu.com/product/4248" target="_blank">Open product</a></li>
+        <li><b>Pololu QTRSensors library:</b> analog/RC sensor setup, calibration and line-position functions. <a href="https://github.com/pololu/qtr-sensors-arduino" target="_blank">Open library</a></li>
+        <li><b>Toshiba TB6612FNG:</b> 2-channel brushed motor driver; VCC 2.7–5.5 V; VM up to 13.5 V; datasheet includes local 0.1 µF/10 µF noise/decoupling guidance. <a href="https://toshiba.semicon-storage.com/info/TB6612FNG_datasheet_en_20141001.pdf?did=10660&prodName=TB6612FNG" target="_blank">Open datasheet</a></li>
+        <li><b>Recent line-follower community example:</b> ESP32 + QTR-8RC + TB6612FNG + 2S LiPo + geared motors was reported as a 2026 competition build. <a href="https://www.reddit.com/r/AskRobotics/comments/1uhp9vb/line_following_robot_mentorship/" target="_blank">Reddit example</a></li>
+        <li><b>Recent ESP32 robot power example:</b> a 2026 robot discussion described random resets/brownout behavior under motor load, reinforcing the need to debug the power path. <a href="https://www.reddit.com/r/esp32/comments/1t6wrkv/esp32_robot_randomly_restarting_under_motor_load/" target="_blank">Reddit example</a></li>
+        <li><b>Original project baseline:</b> the previous school prototype used Arduino Uno, QTR-8A, L293D, two 18650 cells and a servo; it also documented the future recommendation for Wi-Fi. See the attached original project poster in this conversation.</li>
+      </ul>
+
+      <div class="note" style="margin-top:14px">
+        <b>Important limitation:</b> an internet research pass cannot guarantee the quality of every marketplace clone.
+        For the sensor/controller, prefer the exact manufacturer part or a reputable board listing with a return policy.
+        For LiPo batteries, inspect the pack and use a proper balance charger.
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <p><b>Smart Nursing Robot — Rebuild Handout</b> · Prepared as a practical parts-and-wiring specification for a school prototype.</p>
+  <p>Research checked against current manufacturer documentation and UAE marketplace references during September 2026. Prices/stock can change.</p>
+</footer>
+</body>
+</html>

@@ -19,48 +19,54 @@ The **Smart Greenhouse System** is an automated IoT microclimate manager designe
 
 ---
 
-## 🔌 Visual Hardware Wiring & Signal Diagram
+## 🔌 System Hardware Architecture (2-Tier Specification)
+
+### Tier 1: The Big Picture (System Block Architecture)
+*High-level interconnection of primary functional subsystems:*
 
 ```mermaid
-graph TD
-    subgraph Compute ["🧠 Compute & Display"]
-        ESP["NodeMCU ESP8266 MCU"]
-        OLED["SSD1306 128×64 OLED"]
-        ESP -->|"I2C Clock (D1 / GPIO 5)"| OLED
-        ESP -->|"I2C Data (D2 / GPIO 4)"| OLED
-    end
+graph LR
+    PWR["🔋 5V DC Power Supply<br>(USB / External Terminal)"] -->|"5V Main"| ESP["🧠 NodeMCU ESP8266<br>(Core Controller)"]
+    PWR -->|"VCC Rail"| RELAYS["⚡ 4-Channel Relay Module<br>(Optoisolated Coils)"]
+    
+    SENSORS["📡 Environmental Sensors<br>(Soil Moisture, DHT22, LDR)"] -->|"Telemetry Signals"| ESP
+    ESP -->|"I2C Bus"| OLED["🖥️ SSD1306 128×64 OLED<br>(Real-Time Dashboard)"]
+    
+    ESP -->|"Active-LOW Triggers"| RELAYS
+    RELAYS --> PUMP["💧 Submersible Water Pump"]
+    RELAYS --> FAN["💨 5V DC Exhaust Fan"]
+    RELAYS --> LIGHT["💡 5V UV Grow Light"]
 
-    subgraph Sensors ["📡 Environmental Sensors"]
-        DHT["DHT22 (Climate)"] -->|"Digital Data (Pin D4)"| ESP
-        SOIL["Soil Moisture Sensor"] -->|"Analog AO (Pin A0)"| ESP
-        LDR["LDR Light Module"] -->|"Digital DO (Pin D3)"| ESP
-    end
-
-    subgraph Actuation ["⚡ 4-Channel Relay Actuators"]
-        ESP -->|"Active-LOW (Pin D5)"| RELAY1["Relay 1: Exhaust Fan (Cooling)"]
-        ESP -->|"Active-LOW (Pin D6)"| RELAY2["Relay 2: Water Pump (Irrigation)"]
-        ESP -->|"Active-LOW (Pin D7)"| RELAY3["Relay 3: UV Grow Light (Photoperiod)"]
-    end
+    style PWR fill:#2e1f0c,stroke:#f59e0b,stroke-width:2px
+    style ESP fill:#0a2540,stroke:#38bdf8,stroke-width:2px
+    style RELAYS fill:#2d1233,stroke:#c084fc,stroke-width:2px
+    style SENSORS fill:#062e20,stroke:#34d399,stroke-width:2px
+    style OLED fill:#134e4a,stroke:#2dd4bf,stroke-width:2px
+    style PUMP fill:#1e293b,stroke:#94a3b8,stroke-width:2px
+    style FAN fill:#1e293b,stroke:#94a3b8,stroke-width:2px
+    style LIGHT fill:#3b0764,stroke:#d8b4fe,stroke-width:2px
 ```
 
 ---
 
-## 📋 Master Hardware Pinout Specification
+### Tier 2: Pin-by-Pin Assembly Specification
+*Bench wiring matrix with jumper color conventions:*
 
-| Subsystem | Component | Component Pin | NodeMCU Pin | GPIO | Signal Type | Operating Logic / Threshold |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Telemetry Display** | SSD1306 OLED | SCL | **D1** | GPIO 5 | I2C Clock | High-contrast visual dashboard |
-| **Telemetry Display** | SSD1306 OLED | SDA | **D2** | GPIO 4 | I2C Data | 128×64 pixel display interface |
-| **Light Sensing** | LDR Sensor | DO | **D3** | GPIO 0 | Digital Input | Dark (HIGH) triggers UV Grow Light |
-| **Microclimate** | DHT22 Sensor | DATA | **D4** | GPIO 2 | OneWire Digital | > 30.0°C turns fan ON, < 25.0°C OFF |
-| **Cooling Fan** | 4-Ch Relay IN1| IN1 | **D5** | GPIO 14 | Digital Output | Active-LOW (LOW = Relay closed) |
-| **Irrigation Pump** | 4-Ch Relay IN2| IN2 | **D6** | GPIO 12 | Digital Output | Active-LOW (>650 ADC = Pump ON) |
-| **UV Grow Lamp** | 4-Ch Relay IN3| IN3 | **D7** | GPIO 13 | Digital Output | Active-LOW (Low light = Light ON) |
-| **Substrate Moisture**| Soil Moisture | AO | **A0** | ADC 0 | Analog Input | 0–1023 ADC (Dry > 650, Wet < 350) |
+| Subsystem | Component | Component Pin | Wire Color | NodeMCU Pin | GPIO | Operating Logic & Thresholds |
+| :--- | :--- | :--- | :---: | :--- | :--- | :--- |
+| **Telemetry Display**| SSD1306 OLED | SCL | 🟡 Yellow | **D1** | GPIO 5 | I2C Clock · Diagnostic display |
+| **Telemetry Display**| SSD1306 OLED | SDA | 🟢 Green | **D2** | GPIO 4 | I2C Data · 128×64 telemetry graphics |
+| **Photoperiod Sensor**| LDR Light Module | DO | 🟣 Purple | **D3** | GPIO 0 | Digital Input · `HIGH` triggers UV lamp |
+| **Microclimate** | DHT22 Climate | DATA | 🔵 Blue | **D4** | GPIO 2 | Digital OneWire · > 30°C Fan ON, < 25°C OFF |
+| **Cooling Actuator** | 4-Ch Relay IN1 | IN1 | ⚪ White | **D5** | GPIO 14 | Active-LOW · Drives 5V exhaust fan |
+| **Irrigation Pump** | 4-Ch Relay IN2 | IN2 | 🟠 Orange | **D6** | GPIO 12 | Active-LOW · Soil ADC > 650 triggers pump |
+| **UV Grow Lamp** | 4-Ch Relay IN3 | IN3 | 🟤 Brown | **D7** | GPIO 13 | Active-LOW · Low ambient light triggers lamp |
+| **Substrate Hydration**| Soil Moisture | AO | 🟡 Yellow | **A0** | ADC 0 | 0–1023 Analog (Dry > 650, Wet < 350) |
+| **Power Distribution**| Power Bus | 5V / GND | 🔴 / ⚫ | **VIN / GND** | Power | Supplies 5V directly to relay coil bus |
 
-> [!TIP] Power Distribution & Active-LOW Notice
-> - **Relay Control:** Relays operate on **Active-LOW** logic. Setting the GPIO to `LOW` energizes the relay coil.
-> - **Powering the ESP8266:** Micro-USB provides 5V to the board, which passes through the `VIN` pin to power the 5V relay coils directly without pulling heavy current through the 3.3V internal regulator.
+> [!TIP] Power Distribution & Active-LOW Logic Notice
+> - **Active-LOW Relays:** Setting the NodeMCU output pins to `LOW` closes the relay contacts and powers the peripheral.
+> - **Regulator Protection:** Relays and pumps draw surge current; power them directly from the **VIN / 5V** power bus rather than pulling current through the ESP8266 onboard 3.3V LDO regulator.
 
 ---
 

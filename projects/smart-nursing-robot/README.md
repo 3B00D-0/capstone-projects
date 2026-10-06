@@ -21,53 +21,62 @@ It utilizes an infrared reflectance sensor array paired with a **PID (Proportion
 
 ---
 
-## 🔌 Visual Hardware Wiring & Signal Diagram
+## 🔌 System Hardware Architecture (2-Tier Specification)
+
+### Tier 1: The Big Picture (System Block Architecture)
+*High-level interconnection of primary functional subsystems:*
 
 ```mermaid
-graph TD
-    subgraph Power ["🔋 Power Distribution"]
-        BAT["2× 18650 Li-Ion (7.4V)"] -->|EXT PWR| SHIELD["Adafruit Motor Shield v1"]
-        SHIELD -->|5V Regulated| UNO["Arduino Uno MCU"]
-        BAT -.->|Common GND| UNO
-    end
+graph LR
+    BAT["🔋 7.4V Battery Pack<br>(2× 18650 Li-Ion)"] -->|"Motor Power"| SHIELD["⚙️ Adafruit Motor Shield v1"]
+    SHIELD -->|"Regulated 5V"| UNO["🧠 Arduino Uno (ATmega328P)<br>(Core Controller)"]
+    
+    SHIELD -->|"Dual DC Drive"| MOTORS["🚗 2× DC Gear Motors<br>(Differential Locomotion)"]
+    SHIELD -->|"Pulse Alarm"| BUZZ["🚨 Arrival Alert Buzzer"]
+    
+    QTR["📡 5-Channel QTR-8A Sensor<br>(Ground Reflectance Line Array)"] -->|"Position Signals"| UNO
+    TOUCH["👆 TTP223 Touch Sensor<br>(Medicine Bay Trigger)"] -->|"Toggle Event"| UNO
+    UNO -->|"Lid Open/Close"| SERVO["📦 SG90 Micro Servo<br>(Medicine Lid)"]
 
-    subgraph Actuators ["⚙️ Propulsion & Mechanism"]
-        SHIELD -->|Channel M1 (1 kHz)| M1["Left Drive Motor"]
-        SHIELD -->|Channel M2 (1 kHz)| M2["Right Drive Motor"]
-        SHIELD -->|Channel M3| BUZZ["Alert Buzzer"]
-        UNO -->|"SERVO_PIN (Pin 10)"| SERVO["Medicine Lid Servo (SG90)"]
-    end
-
-    subgraph Perception ["📡 Line Tracking & Human Interaction"]
-        QTR["Pololu QTR-8A (5 Sensors)"] -->|"Pins A4, A3, A2, A1, A0"| UNO
-        UNO -->|"EMITTER_PIN (Pin 2)"| QTR
-        TOUCH["TTP223 Capacitive Touch"] -->|"SENSOR_PIN (Pin A5)"| UNO
-    end
+    style BAT fill:#2e1f0c,stroke:#f59e0b,stroke-width:2px
+    style SHIELD fill:#2d1233,stroke:#c084fc,stroke-width:2px
+    style UNO fill:#0a2540,stroke:#38bdf8,stroke-width:2px
+    style MOTORS fill:#1e293b,stroke:#94a3b8,stroke-width:2px
+    style QTR fill:#062e20,stroke:#34d399,stroke-width:2px
+    style TOUCH fill:#134e4a,stroke:#2dd4bf,stroke-width:2px
+    style BUZZ fill:#38111a,stroke:#f43f5e,stroke-width:2px
+    style SERVO fill:#3b0764,stroke:#d8b4fe,stroke-width:2px
 ```
 
 ---
 
-## 📋 Master Hardware Pinout Specification
+### Tier 2: Pin-by-Pin Assembly Specification
+*Bench wiring matrix with jumper color conventions:*
 
-| Subsystem | Component | Component Pin | Arduino Uno Pin | Signal Type | Description / Notes |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Locomotion** | Left DC Motor | Terminal M1 | Shield Port 1 | High-current PWM | Driven at 1 kHz frequency |
-| **Locomotion** | Right DC Motor | Terminal M2 | Shield Port 2 | High-current PWM | Driven at 1 kHz frequency |
-| **Alarm** | Piezo Buzzer | Terminal M3 | Shield Port 3 | Digital PWM | 500ms pulsed audible arrival alarm |
-| **Medicine Lid**| Servo Motor | Signal (Orange) | **Pin 10** | Servo PWM | 90° closed, 180° open |
-| **Touch Trigger**| TTP223 Sensor | OUT | **Pin A5** | Digital Input | Toggle trigger on touch (debounced) |
-| **Line Tracking**| QTR Sensor 1 | OUT 1 | **Pin A0** | Analog / RC Read | Outer Right boundary sensor |
-| **Line Tracking**| QTR Sensor 2 | OUT 2 | **Pin A1** | Analog / RC Read | Inner Right line tracker |
-| **Line Tracking**| QTR Sensor 3 | OUT 3 | **Pin A2** | Analog / RC Read | Center alignment sensor |
-| **Line Tracking**| QTR Sensor 4 | OUT 4 | **Pin A3** | Analog / RC Read | Inner Left line tracker |
-| **Line Tracking**| QTR Sensor 5 | OUT 5 | **Pin A4** | Analog / RC Read | Outer Left boundary sensor |
-| **Emitter Ctrl** | QTR IR LEDs | LEDON | **Pin 2** | Digital Output | Toggles IR emitter LEDs for calibration |
+| Subsystem | Component | Component Pin | Wire Color | Connects To | Signal / Protocol | Notes & Operating Logic |
+| :--- | :--- | :--- | :---: | :--- | :--- | :--- |
+| **Locomotion** | Left Drive Motor | Terminals | 🔴 / ⚫ | **Shield Port M1** | 1 kHz PWM | Speed modulated by PID loop |
+| **Locomotion** | Right Drive Motor| Terminals | 🔴 / ⚫ | **Shield Port M2** | 1 kHz PWM | Speed modulated by PID loop |
+| **Alarm** | Arrival Buzzer | Terminals | 🔴 / ⚫ | **Shield Port M3** | 1 kHz DC Pulse| 500ms pulsed audible arrival chime |
+| **Medicine Bay**| SG90 Servo | Signal | 🟠 Orange | **Pin 10 (SERVO)**| 50 Hz PWM | 90° Closed $\leftrightarrow$ 180° Open |
+| **Medicine Bay**| SG90 Servo | VCC / GND | 🔴 / ⚫ | **5V / GND** | 5V DC Rail | Powered from Shield 5V rail |
+| **Touch Trigger**| TTP223 Sensor | I/O OUT | 🟢 Green | **Pin A5** | Digital Input | Contact-free capacitive bay toggle |
+| **Line Tracker** | QTR Sensor 1 | OUT 1 | 🟣 Purple | **Pin A0** | Analog / RC Read | Far-right line marker detector |
+| **Line Tracker** | QTR Sensor 2 | OUT 2 | 🔵 Blue | **Pin A1** | Analog / RC Read | Inner-right guidance sensor |
+| **Line Tracker** | QTR Sensor 3 | OUT 3 | 🟡 Yellow | **Pin A2** | Analog / RC Read | Centerline tracking sensor |
+| **Line Tracker** | QTR Sensor 4 | OUT 4 | 🟢 Green | **Pin A3** | Analog / RC Read | Inner-left guidance sensor |
+| **Line Tracker** | QTR Sensor 5 | OUT 5 | ⚪ White | **Pin A4** | Analog / RC Read | Far-left line marker detector |
+| **Emitter Bus** | QTR Array | LEDON | 🟤 Brown | **Pin 2** | Digital Output | Shuts off IR emitters for calibration |
 
-> [!NOTE] Power Supply Architecture
-> - The Adafruit Motor Shield is powered via external 7.4V battery pack with the `PWR` jumper set to draw motor current directly from batteries, protecting the Arduino from inductive voltage spikes and brownouts.
+> [!NOTE] Power Supply & Inductive Isolation
+> - The Adafruit Motor Shield is powered directly via an external 7.4V battery pack with the `PWR` jumper in place. This isolates inductive motor current spikes from the sensitive ATmega328P logic lines, preventing system freezes and jitter.
 
 ---
 
-## 📂 Source Code
-- Arduino Sketch: [`firmware/main.ino`](./firmware/main.ino)
-- Portfolio Metadata: [`project.json`](./project.json)
+## 📂 Project Structure & Documentation
+- **Firmware**: [`firmware/main.ino`](./firmware/main.ino) (PID Line Tracker + Capacitive Touch Dispenser)
+- **Educational Guides**:
+  - [`docs/student-guide-ar.html`](./docs/student-guide-ar.html): دليل مبسط ومصاحب للطلاب لشرح عمل الروبوت ومكوناته
+  - [`docs/rebuild-handout.html`](./docs/rebuild-handout.html): Full engineering rebuild & assembly guide
+- **Metadata**: [`project.json`](./project.json)
+

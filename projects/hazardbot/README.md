@@ -28,60 +28,68 @@
 
 ---
 
-## 🔌 Visual Hardware Wiring & Signal Diagram
+## 🔌 System Hardware Architecture (2-Tier Specification)
+
+### Tier 1: The Big Picture (System Block Architecture)
+*High-level interconnection of primary functional subsystems:*
 
 ```mermaid
-graph TD
-    subgraph Power ["🔋 Power Subsystem"]
-        BAT["2× 18650 Li-Ion (7.4V)"] -->|12V In| L298N
-        L298N -->|5V Out / 3.3V Logic| ESP32["ESP32-WROOM-32 MCU"]
-        BAT -.->|Common GND| ESP32
-    end
+graph LR
+    PWR["🔋 7.4V Battery Pack<br>(2× 18650 Li-Ion)"] -->|"Raw 7.4V"| DRV["⚙️ L298N Motor Driver"]
+    DRV -->|"Regulated 5V"| MCU["🧠 NodeMCU ESP32-S<br>(Core Controller)"]
+    DRV -->|"High-Current PWM"| MOTORS["🚗 2× TT DC Motors<br>(Chassis Locomotion)"]
+    
+    SENSORS["📡 Environmental Array<br>(MQ-2, MQ-135, DHT11)"] -->|"Telemetry Signals"| MCU
+    MCU -->|"Audible / Visual Alarms"| ALERTS["🚨 Buzzer & Alert LED"]
+    
+    MCU <===>|"BLE 4.2 / WiFi AP"| APP["📱 Smartphone PWA Dashboard"]
 
-    subgraph Locomotion ["⚙️ Propulsion Subsystem"]
-        ESP32 -->|"ENA (GPIO 14) / ENB (GPIO 13)"| L298N["L298N Motor Driver"]
-        ESP32 -->|"IN1-IN4 (GPIO 27, 26, 25, 33)"| L298N
-        L298N --> M1["Left TT DC Motor"]
-        L298N --> M2["Right TT DC Motor"]
-    end
-
-    subgraph Sensors ["📡 Sensor & Alert Array"]
-        MQ2["MQ-2 Flammable Gas"] -->|"AO via 10k/20k Divider"| ADC1A["GPIO 36 (ADC1_CH0)"]
-        MQ135["MQ-135 Toxic Air"] -->|"AO via 10k/20k Divider"| ADC1B["GPIO 39 (ADC1_CH3)"]
-        DHT["DHT11 Climate"] -->|"Digital Data"| GPIO21["GPIO 21 (OneWire)"]
-        ADC1A --> ESP32
-        ADC1B --> ESP32
-        GPIO21 --> ESP32
-        ESP32 -->|"Alert Signal"| BUZZ["Active Buzzer & Red LED"]
-    end
+    style PWR fill:#2e1f0c,stroke:#f59e0b,stroke-width:2px
+    style DRV fill:#2d1233,stroke:#c084fc,stroke-width:2px
+    style MCU fill:#0a2540,stroke:#38bdf8,stroke-width:2px
+    style MOTORS fill:#1e293b,stroke:#94a3b8,stroke-width:2px
+    style SENSORS fill:#062e20,stroke:#34d399,stroke-width:2px
+    style ALERTS fill:#38111a,stroke:#f43f5e,stroke-width:2px
+    style APP fill:#1e1b4b,stroke:#818cf8,stroke-width:2px
 ```
 
 ---
 
-## 📋 Master Hardware Pinout Specification
+### Tier 2: Pin-by-Pin Assembly Specification
+*Bench wiring matrix with jumper color conventions and electrical protections:*
 
-### 1. Motor Driver (L298N) Interface
-| Function | L298N Pin | ESP32 GPIO | Signal Type | Voltage / Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **Left Motor PWM Speed** | `ENA` | `GPIO 14` | Output (PWM) | Speed control (0–255) |
-| **Left Motor Direction 1** | `IN1` | `GPIO 27` | Digital Output | High / Low logic |
-| **Left Motor Direction 2** | `IN2` | `GPIO 26` | Digital Output | High / Low logic |
-| **Right Motor Direction 1**| `IN3` | `GPIO 25` | Digital Output | High / Low logic |
-| **Right Motor Direction 2**| `IN4` | `GPIO 33` | Digital Output | High / Low logic |
-| **Right Motor PWM Speed** | `ENB` | `GPIO 13` | Output (PWM) | *Moved from GPIO 12 to prevent boot conflict* |
+#### A. Propulsion & Motor Driver (L298N)
+| Subsystem | Terminal / Pin | Wire Color | Connects To | MCU Pin / Bus | Electrical Notes |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **Power In** | `12V Power` | 🔴 Red | Battery (+) | Battery Positive | 7.4V nominal direct battery input |
+| **Ground** | `GND` | ⚫ Black | Battery (−) & MCU | **Common GND** | **Critical:** Star ground for motor noise isolation |
+| **Logic Supply**| `5V Out` | 🟠 Orange | ESP32 Power In | **VIN** | Supplies regulated 5V to ESP32 regulator |
+| **Left Speed** | `ENA` | ⚪ White | PWM Speed | **GPIO 14** | Left motor PWM duty cycle (0–255) |
+| **Left Dir 1** | `IN1` | 🟡 Yellow | Direction Logic | **GPIO 27** | Forward / Backward H-Bridge logic |
+| **Left Dir 2** | `IN2` | 🟢 Green | Direction Logic | **GPIO 26** | Forward / Backward H-Bridge logic |
+| **Right Dir 1**| `IN3` | 🔵 Blue | Direction Logic | **GPIO 25** | Forward / Backward H-Bridge logic |
+| **Right Dir 2**| `IN4` | 🟣 Purple | Direction Logic | **GPIO 33** | Forward / Backward H-Bridge logic |
+| **Right Speed**| `ENB` | 🟤 Brown | PWM Speed | **GPIO 13** | *Moved from GPIO 12 to resolve boot strapping issue* |
 
-### 2. Environmental Sensors & Alerts Interface
-| Component | Sensor Pin | ESP32 GPIO | Signal Type | Voltage & Critical Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **MQ-2 Gas Sensor** | `AO` (Analog) | `GPIO 36` (VP) | Analog (ADC1) | **10kΩ / 20kΩ Voltage Divider** (Scales 5V to 3.3V) |
-| **MQ-135 Air Quality** | `AO` (Analog) | `GPIO 39` (VN) | Analog (ADC1) | **10kΩ / 20kΩ Voltage Divider** (Scales 5V to 3.3V) |
-| **DHT11 Temp / Humidity**| `DATA` | `GPIO 21` | Digital Bidirectional | Powered via 3.3V rail |
-| **Audio Alert** | `+` (Anode) | `GPIO alert` | Digital Output | Active high trigger (500ms pulsing) |
+#### B. Environmental Telemetry & Threat Alerts
+| Sensor | Pin Label | Wire Color | Connects To | MCU Pin / Bus | Signal & Safety Protection |
+| :--- | :--- | :---: | :--- | :--- | :--- |
+| **MQ-2 Gas** | `VCC` | 🔴 Red | 5V Rail | **VIN / 5V** | 5V required for internal heating element |
+| **MQ-2 Gas** | `GND` | ⚫ Black | Ground Rail | **GND** | Sensor circuit ground |
+| **MQ-2 Gas** | `AO` | 🟡 Yellow | Voltage Divider In | — | Fed into 10kΩ series resistor |
+| **Divider Mid**| `OUT` | 🟣 Purple | ADC Input | **GPIO 36 (ADC1_0)**| **Stepped to 3.3V** via 10k/20k resistor network |
+| **MQ-135 Air** | `VCC` | 🔴 Red | 5V Rail | **VIN / 5V** | 5V required for internal heating element |
+| **MQ-135 Air** | `GND` | ⚫ Black | Ground Rail | **GND** | Sensor circuit ground |
+| **MQ-135 Air** | `AO` | 🟡 Yellow | Voltage Divider In | — | Fed into 10kΩ series resistor |
+| **Divider Mid**| `OUT` | 🟣 Purple | ADC Input | **GPIO 39 (ADC1_3)**| **Stepped to 3.3V** via 10k/20k resistor network |
+| **DHT11 Climate**| `VCC` / `GND`| 🔴 / ⚫ | 3.3V / GND Rail | **3V3 / GND** | Powered safely from 3.3V logic rail |
+| **DHT11 Climate**| `DATA` | 🔵 Blue | Bidirectional Data | **GPIO 21** | Digital OneWire signal (integrated pull-up) |
+| **Audio Alarm** | `+` (Anode)| 🟢 Green | Pulse Driver | **GPIO Alert** | Pulsed 500ms audio beep on threshold breach |
 
-> [!WARNING] Hardware Protection Invariants
-> 1. **ADC2 Contention:** All analog sensors are strictly wired to **ADC1 (GPIO 36 & 39)** because ESP32 WiFi transmission disables ADC2 entirely.
-> 2. **Voltage Divider Safety:** Connecting MQ sensor 5V analog outputs directly to ESP32 without 10k/20k dividers will permanently burn GPIO inputs.
-> 3. **Common Ground:** All battery, motor driver, and ESP32 grounds must connect to a single unified Ground bus.
+> [!WARNING] Crucial Electrical Invariants
+> 1. **ADC1 Exclusivity:** All analog sensors are routed strictly to **ADC1 channels (GPIO 36 & 39)**. The ESP32 disables ADC2 completely whenever WiFi is broadcasting.
+> 2. **5V Over-Voltage Guard:** Connecting MQ sensor 5V analog lines directly to an ESP32 without 10kΩ/20kΩ dividers will cause permanent silicon breakdown.
+> 3. **Single Star Ground:** Motor ground and ESP32 logic ground must meet at one common point to prevent ground bounce.
 
 ---
 
