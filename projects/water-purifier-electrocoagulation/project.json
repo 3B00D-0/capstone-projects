@@ -1,13 +1,13 @@
 {
-  "id": "05-water-purification-electrocoagulation",
+  "id": "water-purifier-electrocoagulation",
   "title": "Automated Electrocoagulation Water Purification System",
   "subtitle": "Microcontroller-Driven Water Treatment with Periodic Polarity Reversal",
   "status": "completed",
-  "category": "Environmental Engineering & STEM Tech",
-  "team": "Minia University STEM Team",
-  "institution": "Minia University, Faculty of Education",
   "date": "2025-05",
   "featured": true,
+  "category": "Environmental Engineering & Applied Tech",
+  "team": "Minia University STEM Team",
+  "institution": "Minia University, Faculty of Education",
   "description": "An automated microcontroller-regulated water purification apparatus employing electrocoagulation. Uses an Adafruit Motor Shield to alternate electrode polarity every 20 seconds preventing electrode passivation during a 20-minute cycle before engaging a multi-stage filtration pump.",
   "techStack": [
     "Arduino C++",
@@ -17,6 +17,6 @@
     "Water Quality Treatment"
   ],
   "links": {
-    "repository": "https://github.com/3B00D-0/capstone-projects/tree/main/projects/05-water-purification-electrocoagulation"
+    "repository": "https://github.com/3B00D-0/capstone-projects/tree/main/projects/water-purifier-electrocoagulation"
   }
 }

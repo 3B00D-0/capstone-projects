@@ -1,0 +1,24 @@
+{
+  "id": "smart-greenhouse",
+  "title": "Smart Greenhouse & Automated Plant Microclimate",
+  "subtitle": "IoT Microclimate & Soil Moisture Regulation with ESP8266 & OLED",
+  "status": "completed",
+  "date": "2026-05",
+  "featured": true,
+  "category": "IoT & Precision Agriculture",
+  "team": "Solo / Team",
+  "institution": "Minia University, Faculty of Education",
+  "description": "An automated IoT plant care microclimate system based on the ESP8266 NodeMCU. Continually tracks soil hydration, ambient luminosity (LDR), and climate metrics (DHT22), automatically actuating irrigation pumps, exhaust cooling fans, and UV growth lamps with an SSD1306 OLED display.",
+  "techStack": [
+    "ESP8266 NodeMCU C++",
+    "Soil Moisture Resistive Sensor",
+    "Digital LDR Light Sensor",
+    "DHT22 High-Precision Climate Sensor",
+    "Adafruit SSD1306 128x64 OLED Display",
+    "4-Channel Active-LOW Relay",
+    "Automated Irrigation & Microclimate Loop"
+  ],
+  "links": {
+    "repository": "https://github.com/3B00D-0/capstone-projects/tree/main/projects/smart-greenhouse"
+  }
+}

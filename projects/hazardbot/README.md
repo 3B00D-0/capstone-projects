@@ -3,6 +3,11 @@
 > **Capstone Engineering Project · Team VERTEX (9 Members) · Minia University**  
 > *Low-Cost Dual-Controlled (Bluetooth + WiFi) Environmental Reconnaissance Rover*
 
+<div align="center">
+  <img src="./docs/media/hardware-front.jpg" alt="HazardBot Rover Front View" width="550" style="border-radius: 8px;" />
+  <p><em>HazardBot Rover — Two-Wheel Differential Drive with ESP32-WROOM-32 & MQ Gas Sensors</em></p>
+</div>
+
 ---
 
 ## 📌 Executive Summary
@@ -40,6 +45,13 @@
 
 ---
 
+## 📸 Physical Rover Gallery
+| Top Chassis View | Electronics & Sensor Wiring |
+| :---: | :---: |
+| <img src="./docs/media/hardware-chassis.jpg" width="380" /> | <img src="./docs/media/hardware-electronics.jpg" width="380" /> |
+
+---
+
 ## 📂 Repository Layout
 - `firmware/`:
   - [`main.ino`](./firmware/main.ino): Production flight firmware v3.1 (BLE, WiFi AP web server, sensors, motor anti-spam).
@@ -52,5 +64,5 @@
   - [`booklet.pdf`](./docs/booklet.pdf): Formal EDP Engineering Design Process Booklet.
   - [`booklet.md`](./docs/booklet.md): Comprehensive project technical answers & questions.
   - [`poster.md`](./docs/poster.md): Exhibition poster presentation content.
-  - `media/`: Physical rover photos (`hardware-front.jpg`, `hardware-chassis.jpg`, `hardware-electronics.jpg`).
+  - `media/`: Physical rover photos.
 - [`project.json`](./project.json): Portfolio metadata feed.
