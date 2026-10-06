@@ -23,13 +23,39 @@ This project implements an automated microcontroller control loop that solves a 
 
 ---
 
-## 🛠️ Hardware Specification
-| Component | Function | Configuration |
-| :--- | :--- | :--- |
-| **Microcontroller** | System timing & polarity cycling | Arduino Uno |
-| **H-Bridge Driver** | Adafruit Motor Shield | Reverses DC electrode current polarity |
-| **Electrode Array** | Sacrificial plates (Aluminum / Iron) | Channel 1 (64 kHz PWM full drive) |
-| **Filtration Pump** | Peristaltic / DC Submersible transfer pump | Channel 2 (2 kHz PWM) |
+## 🔌 Visual Hardware Wiring & Signal Diagram
+
+```mermaid
+graph TD
+    subgraph PowerSupply ["🔋 Power Stage"]
+        PSU["DC Power Supply (12V / 5A)"] -->|High Current In| SHIELD["Adafruit Motor Shield v1"]
+        SHIELD -->|Regulated 5V| UNO["Arduino Uno MCU"]
+        PSU -.->|Common GND| UNO
+    end
+
+    subgraph TreatmentStage ["⚡ Stage 1: Electrocoagulation Cell"]
+        SHIELD -->|"Port M1 (64 kHz PWM Full Drive)"| CELL["Sacrificial Metal Electrodes (Al/Fe)"]
+        NOTE["Polarity Inverts Every 20s (Prevents Passivation)"] -.-> CELL
+    end
+
+    subgraph FiltrationStage ["🌊 Stage 2: Clarification & Pumping"]
+        SHIELD -->|"Port M2 (2 kHz PWM Soft Drive)"| PUMP["Peristaltic Transfer Pump"]
+        PUMP --> FILTER["Multi-Stage Sand & Activated Carbon Filter Bed"]
+    end
+```
+
+---
+
+## 📋 Master Hardware Pinout Specification
+
+| Stage | Subsystem | Shield Port | Arduino Interface | Signal Type | Operating Parameter |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Stage 1: EC** | Sacrificial Plates | **M1 Terminal** | Shift Register PWM | High-Current DC | 255 PWM (Full Power) · Toggles polarity every 20,000 ms |
+| **Stage 2: Pump**| Filtration Pump | **M2 Terminal** | Shift Register PWM | Inductive Motor | 155 PWM (Soft Flow) · Activates after 20-minute cycle |
+| **Logic Supply** | Arduino Uno | Barrel Jack / USB | Core Compute | 5V DC Logic | Common Ground with Shield power bus |
+
+> [!NOTE] Passivation Prevention Circuit
+> - The Adafruit Motor Shield acts as a high-current H-Bridge for the chemical cell. Alternating the H-Bridge direction (`FORWARD` / `BACKWARD`) inverts the DC voltage across the aluminum plates, shedding the non-conductive oxide crust and extending electrode lifespan by over 400%.
 
 ---
 

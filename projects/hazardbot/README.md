@@ -28,20 +28,60 @@
 
 ---
 
-## ⚙️ Hardware Architecture & Critical Solutions
-| Component | Part | Role |
-| :--- | :--- | :--- |
-| **Microcontroller** | NodeMCU ESP32-S (ESP32-WROOM-32) | Core compute, WiFi AP, Bluetooth SPP |
-| **Motor Driver** | L298N Dual H-Bridge | Dual TT DC gear motor control with PWM speed shaping |
-| **Locomotion** | 2× TT DC Motors + Castor Wheel | Differential drive chassis |
-| **Power Distribution** | 2× 18650 Li-Ion (7.4V series nominal) | Independent motor driver & logic power |
-| **Sensors** | MQ-2, MQ-135, DHT11 | Environmental telemetry collection |
-| **Alerts** | Active Buzzer + Red Indicator LED | Threshold breach alert system |
+## 🔌 Visual Hardware Wiring & Signal Diagram
 
-### ⚡ Critical Hardware Engineering Solutions Solved
-1. **5V Sensor ↔ 3.3V Logic Level Matching:** MQ analog outputs produce 0–5V, exceeding ESP32 maximum ratings. Solved using precision **10kΩ / 20kΩ voltage dividers** stepping analog voltages down to safe 3.3V limits.
-2. **ADC2 & WiFi Hardware Contention:** ESP32 WiFi controller locks all ADC2 channels during transmission. Solved by exclusively routing all analog inputs to **ADC1 channels (GPIO36, GPIO39)**.
-3. **Boot Strapping Protection:** GPIO12 strapping pin conflicts with motor ENB lines during reset. Re-routed to **GPIO13** to guarantee reliable boot sequencing.
+```mermaid
+graph TD
+    subgraph Power ["🔋 Power Subsystem"]
+        BAT["2× 18650 Li-Ion (7.4V)"] -->|12V In| L298N
+        L298N -->|5V Out / 3.3V Logic| ESP32["ESP32-WROOM-32 MCU"]
+        BAT -.->|Common GND| ESP32
+    end
+
+    subgraph Locomotion ["⚙️ Propulsion Subsystem"]
+        ESP32 -->|"ENA (GPIO 14) / ENB (GPIO 13)"| L298N["L298N Motor Driver"]
+        ESP32 -->|"IN1-IN4 (GPIO 27, 26, 25, 33)"| L298N
+        L298N --> M1["Left TT DC Motor"]
+        L298N --> M2["Right TT DC Motor"]
+    end
+
+    subgraph Sensors ["📡 Sensor & Alert Array"]
+        MQ2["MQ-2 Flammable Gas"] -->|"AO via 10k/20k Divider"| ADC1A["GPIO 36 (ADC1_CH0)"]
+        MQ135["MQ-135 Toxic Air"] -->|"AO via 10k/20k Divider"| ADC1B["GPIO 39 (ADC1_CH3)"]
+        DHT["DHT11 Climate"] -->|"Digital Data"| GPIO21["GPIO 21 (OneWire)"]
+        ADC1A --> ESP32
+        ADC1B --> ESP32
+        GPIO21 --> ESP32
+        ESP32 -->|"Alert Signal"| BUZZ["Active Buzzer & Red LED"]
+    end
+```
+
+---
+
+## 📋 Master Hardware Pinout Specification
+
+### 1. Motor Driver (L298N) Interface
+| Function | L298N Pin | ESP32 GPIO | Signal Type | Voltage / Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| **Left Motor PWM Speed** | `ENA` | `GPIO 14` | Output (PWM) | Speed control (0–255) |
+| **Left Motor Direction 1** | `IN1` | `GPIO 27` | Digital Output | High / Low logic |
+| **Left Motor Direction 2** | `IN2` | `GPIO 26` | Digital Output | High / Low logic |
+| **Right Motor Direction 1**| `IN3` | `GPIO 25` | Digital Output | High / Low logic |
+| **Right Motor Direction 2**| `IN4` | `GPIO 33` | Digital Output | High / Low logic |
+| **Right Motor PWM Speed** | `ENB` | `GPIO 13` | Output (PWM) | *Moved from GPIO 12 to prevent boot conflict* |
+
+### 2. Environmental Sensors & Alerts Interface
+| Component | Sensor Pin | ESP32 GPIO | Signal Type | Voltage & Critical Notes |
+| :--- | :--- | :--- | :--- | :--- |
+| **MQ-2 Gas Sensor** | `AO` (Analog) | `GPIO 36` (VP) | Analog (ADC1) | **10kΩ / 20kΩ Voltage Divider** (Scales 5V to 3.3V) |
+| **MQ-135 Air Quality** | `AO` (Analog) | `GPIO 39` (VN) | Analog (ADC1) | **10kΩ / 20kΩ Voltage Divider** (Scales 5V to 3.3V) |
+| **DHT11 Temp / Humidity**| `DATA` | `GPIO 21` | Digital Bidirectional | Powered via 3.3V rail |
+| **Audio Alert** | `+` (Anode) | `GPIO alert` | Digital Output | Active high trigger (500ms pulsing) |
+
+> [!WARNING] Hardware Protection Invariants
+> 1. **ADC2 Contention:** All analog sensors are strictly wired to **ADC1 (GPIO 36 & 39)** because ESP32 WiFi transmission disables ADC2 entirely.
+> 2. **Voltage Divider Safety:** Connecting MQ sensor 5V analog outputs directly to ESP32 without 10k/20k dividers will permanently burn GPIO inputs.
+> 3. **Common Ground:** All battery, motor driver, and ESP32 grounds must connect to a single unified Ground bus.
 
 ---
 
