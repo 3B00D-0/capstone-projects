@@ -1,0 +1,45 @@
+# OS metadata
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# IDEs & Editors
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Node / Web
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.next/
+out/
+
+# Arduino / C++
+*.hex
+*.elf
+*.o
+*.bin
+build/
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key

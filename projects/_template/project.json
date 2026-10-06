@@ -1,0 +1,21 @@
+{
+  "id": "XX-project-name",
+  "title": "Project Title",
+  "subtitle": "Short one-line subtitle",
+  "status": "in-progress",
+  "category": "STEM Education / Software / Robotics",
+  "team": "Team Name / Solo",
+  "institution": "Minia University",
+  "date": "YYYY-MM",
+  "featured": false,
+  "description": "Comprehensive project description summarizing objectives, problem statement, and solution.",
+  "techStack": [
+    "Technology 1",
+    "Technology 2"
+  ],
+  "links": {
+    "repository": "https://github.com/3B00D-0/capstone-projects/tree/main/projects/XX-project-name",
+    "demo": "",
+    "documentation": ""
+  }
+}
