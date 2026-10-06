@@ -34,5 +34,5 @@ It utilizes an infrared reflectance sensor array paired with a **PID (Proportion
 ---
 
 ## 📂 Source Code
-- Arduino Sketch: [`src/Main_Code.ino`](./src/Main_Code.ino)
+- Arduino Sketch: [`firmware/main.ino`](./firmware/main.ino)
 - Portfolio Metadata: [`project.json`](./project.json)

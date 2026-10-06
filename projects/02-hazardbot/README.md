@@ -42,10 +42,15 @@
 
 ## 📂 Repository Layout
 - `firmware/`:
-  - [`HazardBot_VERTEX.ino`](./firmware/HazardBot_VERTEX.ino): Production flight sketch (WiFi, Bluetooth, sensor loop).
-  - [`HazardBot_Calibration.ino`](./firmware/HazardBot_Calibration.ino): Sensor baseline and PID motor calibration routines.
+  - [`main.ino`](./firmware/main.ino): Production flight firmware v3.1 (BLE, WiFi AP web server, sensors, motor anti-spam).
+  - [`sensor-calibration.ino`](./firmware/sensor-calibration.ino): Sensor baseline warmup and calibration test sketch.
 - `app/`:
   - [`index.html`](./app/index.html): Progressive Web App UI with joystick and real-time dashboard.
   - [`manifest.json`](./app/manifest.json): PWA installation manifest.
-  - Icons and design assets.
+  - Offline icons (`icon-192.png`, `icon-512.png`).
+- `docs/`:
+  - [`booklet.pdf`](./docs/booklet.pdf): Formal EDP Engineering Design Process Booklet.
+  - [`booklet.md`](./docs/booklet.md): Comprehensive project technical answers & questions.
+  - [`poster.md`](./docs/poster.md): Exhibition poster presentation content.
+  - `media/`: Physical rover photos (`hardware-front.jpg`, `hardware-chassis.jpg`, `hardware-electronics.jpg`).
 - [`project.json`](./project.json): Portfolio metadata feed.

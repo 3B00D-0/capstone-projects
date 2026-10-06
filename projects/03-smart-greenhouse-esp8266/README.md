@@ -14,8 +14,8 @@ The **Smart Greenhouse System** is an automated IoT microclimate manager designe
 - **Closed-Loop Soil Hydration:** Resistive soil moisture sensor triggers a 5V submersible water pump when soil moisture falls below calibrated thresholds.
 - **Microclimate Regulation:** DHT22 temperature and humidity sensor drives a 5V exhaust fan to vent excess heat.
 - **Supplemental Photoperiod Lighting:** Relayed UV grow lighting cycle to maintain photosynthetic activity.
-- **Real-Time Visual Feedback:** 16×2 I2C LCD provides immediate diagnostic telemetry (Temp, Humidity, Soil %, Active Relays).
-- **Manual Override Controls:** Physical push-button interface for emergency manual fan and pump triggers.
+- **Real-Time Visual Feedback:** Adafruit SSD1306 (128×64) OLED I2C display provides real-time telemetry (Temp, Humidity, Soil %, Active Relay states).
+- **Light-Sensitive Photoperiod:** Digital LDR Module measures ambient luminosity to trigger supplemental lighting.
 
 ---
 
@@ -23,16 +23,16 @@ The **Smart Greenhouse System** is an automated IoT microclimate manager designe
 | Component | Function | Interface / Pin |
 | :--- | :--- | :--- |
 | **NodeMCU ESP8266** | Central compute & control logic | Core Microcontroller |
-| **DHT22** | Ambient temperature & relative humidity | GPIO (Digital Input with 10kΩ pull-up) |
-| **Soil Moisture Sensor** | Substrate volumetric water content | Analog Pin `A0` (0–1023 ADC) |
-| **4-Channel Relay (5V)** | Isolated AC/DC power switching | Active-LOW GPIO triggers |
-| **16×2 LCD with I2C** | Real-time telemetry dashboard | `D1` (SCL) / `D2` (SDA) |
-| **5V Water Pump** | Precision soil irrigation | Relay Channel 1 |
-| **5V Cooling Fan** | Thermal dissipation & airflow | Relay Channel 2 |
-| **5V UV Grow Light** | Plant photosynthesis support | Relay Channel 3 |
+| **DHT22** | Ambient temperature & relative humidity | Pin `D4` |
+| **Soil Moisture Sensor** | Substrate volumetric water content | Analog Pin `A0` |
+| **LDR Sensor Module** | Ambient illumination detector | Digital Pin `D3` |
+| **SSD1306 OLED (128×64)** | High-contrast real-time telemetry display | I2C (`D1` SCL / `D2` SDA) |
+| **Relay Channel 1** | 5V DC Exhaust Cooling Fan | Pin `D5` (Active-LOW) |
+| **Relay Channel 2** | 5V Submersible Water Pump | Pin `D6` (Active-LOW) |
+| **Relay Channel 3** | 5V UV Grow Lamp | Pin `D7` (Active-LOW) |
 
 ---
 
 ## 📂 Source Code
-- ESP8266 Firmware: [`src/SmartGreenhouse_ESP8266.ino`](./src/SmartGreenhouse_ESP8266.ino)
+- ESP8266 Firmware: [`firmware/main.ino`](./firmware/main.ino)
 - Portfolio Feed: [`project.json`](./project.json)
